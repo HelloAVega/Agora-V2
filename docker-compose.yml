@@ -1,0 +1,42 @@
+services:
+  # Development Environment
+  agora-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: agora-dev
+    ports:
+      - "5000:5000"      # Backend API
+      - "5173:5173"      # Vite dev server
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/server/node_modules
+      - /app/client/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+      - VITE_API_URL=http://localhost:5000
+    command: npm run dev
+    restart: unless-stopped
+
+  # PostgreSQL Database (optional - for future use)
+  postgres:
+    image: postgres:16-alpine
+    container_name: agora-postgres
+    environment:
+      POSTGRES_DB: agora_db
+      POSTGRES_USER: agora_user
+      POSTGRES_PASSWORD: agora_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+# Usage:
+# Development: docker-compose up
+# Production: docker build -t agora:latest . && docker run -p 5000:5000 agora:latest
