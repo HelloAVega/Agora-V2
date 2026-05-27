@@ -21,8 +21,8 @@
   },
   "devDependencies": {},
   "engines": {
-    "node": "20.x",
-    "npm": "10.x"
+    "node": "22.x",
+    "npm": "11.x"
   },
   "keywords": [
     "agora",
