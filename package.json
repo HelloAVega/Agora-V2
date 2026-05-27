@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server/server.js",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
-    "build": "npm run client:build && npm run server:build",
+    "build": "npm run client:build",
     "heroku-postbuild": "npm run install:all && npm run build",
     "install:all": "cd server && npm install --production=false && cd ../client && npm install --production=false && cd ..",
     "client:dev": "cd client && npm run dev",
