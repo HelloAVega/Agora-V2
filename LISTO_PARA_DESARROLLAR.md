@@ -314,4 +314,3 @@ Y luego:
 npm run dev
 ```
 
-¡A desarrollar! 🚀

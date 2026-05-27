@@ -17,9 +17,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "concurrently": "^8.2.0"
+    "concurrently": "^8.2.0",
+    "lucide-react": "^1.16.0"
   },
-  "devDependencies": {},
   "engines": {
     "node": "22.x",
     "npm": "11.x"

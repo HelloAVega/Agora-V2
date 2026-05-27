@@ -315,4 +315,3 @@ npm run dev
 node setup-full.js
 ```
 
-¡A desarrollar! 🎉
