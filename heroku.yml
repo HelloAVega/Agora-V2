@@ -4,6 +4,8 @@ build:
   config:
     NODE_ENV: production
     NPM_CONFIG_PRODUCTION: false
-  
+    BUILDPACK_IGNORE_NODE_MODULES: true
+
 run:
   web: node server/server.js
+
