@@ -8,6 +8,7 @@
     "start": "node server/server.js",
     "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
     "build": "npm run client:build && npm run server:build",
+    "heroku-postbuild": "npm run client:build",
     "client:dev": "cd client && npm run dev",
     "client:build": "cd client && npm run build",
     "server:dev": "cd server && npm run dev",
@@ -19,8 +20,8 @@
   },
   "devDependencies": {},
   "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=8.0.0"
+    "node": "18.x",
+    "npm": "9.x"
   },
   "keywords": [
     "agora",

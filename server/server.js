@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 
@@ -14,7 +15,11 @@ const io = new Server(httpServer, {
 app.use(cors());
 app.use(express.json());
 
-// Health check
+// Serve static files from React build
+const buildPath = path.join(__dirname, '../client/dist');
+app.use(express.static(buildPath));
+
+// API routes
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -27,9 +32,15 @@ io.on('connection', (socket) => {
   });
 });
 
+// Catch-all handler to serve React app for client-side routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(buildPath, 'index.html'));
+});
+
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
+  console.log(`📱 Frontend serving from: ${buildPath}`);
 });
 
 module.exports = { app, io };

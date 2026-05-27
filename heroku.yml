@@ -1,0 +1,9 @@
+build:
+  languages:
+    - nodejs
+  config:
+    NODE_ENV: production
+    NPM_CONFIG_PRODUCTION: false
+  
+run:
+  web: node server/server.js
