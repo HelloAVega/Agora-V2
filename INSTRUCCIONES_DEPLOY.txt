@@ -1,0 +1,153 @@
+📌 INSTRUCCIONES PARA APLICAR LA SOLUCIÓN
+==========================================
+
+⚠️  IMPORTANTE: Estos cambios DEBEN ser pusheados a GitHub para que Heroku los detecte
+
+PASO 1: Abrir Git Bash o PowerShell en la carpeta del proyecto
+───────────────────────────────────────────────────────────
+cd c:\Users\teamv\Downloads\Agora-V2
+
+
+PASO 2: Verificar estado de git
+────────────────────────────────
+git status
+
+Deberías ver:
+- modified: package.json
+- modified: .npmrc
+- modified: heroku.yml
+- new file: build.sh
+- new file: HEROKU_BUILD_FIX_v2.md
+- new file: SOLUCION_VITE_NOT_FOUND.txt
+
+
+PASO 3: Agregar todos los cambios
+──────────────────────────────────
+git add -A
+
+
+PASO 4: Hacer commit
+────────────────────
+git commit -m "Fix: Ensure client dependencies installed during Heroku build
+
+- Updated Node.js to 20.x, npm to 10.x (modern LTS versions)
+- Added install:all script that explicitly installs server/ and client/ dependencies
+- Updated heroku-postbuild to run install:all before build
+- This ensures Vite is installed in client/node_modules before build phase
+- Added .npmrc with legacy-peer-deps for compatibility
+- Enhanced heroku.yml with NPM_CONFIG_PRODUCTION=false"
+
+
+PASO 5: Hacer push a GitHub
+────────────────────────────
+git push origin main
+
+O si tu rama es diferente:
+git push origin <tu-rama>
+
+
+PASO 6: Monitorear Heroku (IMPORTANTE)
+──────────────────────────────────────
+
+Opción A - Dashboard web:
+1. Ve a https://dashboard.heroku.com/apps/tu-app-name
+2. En la pestaña "Activity" verás el nuevo build
+3. Espera a que diga "Deployed" o "Build failed"
+4. Si hay errores, click en el build para ver logs completos
+
+Opción B - Línea de comandos:
+heroku logs --tail -a tu-app-name
+
+(Reemplaza "tu-app-name" con el nombre de tu app en Heroku)
+
+
+PASO 7: Verificar que funciona
+───────────────────────────────
+
+En los logs deberías ver:
+
+✅ CORRECTO (busca esto):
+-----> Build
+Detected both "build" and "heroku-postbuild" scripts
+Running heroku-postbuild
+> agora-v2@1.0.0 heroku-postbuild
+> npm run install:all && npm run build
+
+> agora-v2@1.0.0 install:all
+> cd server && npm install --production=false && cd ../client && npm install --production=false && cd ..
+
+(Se instalan dependencias de server/)
+(Se instalan dependencias de client/)
+
+> agora-v2@1.0.0 build
+> npm run client:build && npm run server:build
+
+> agora-v2@1.0.0 client:build
+> cd client && npm run build
+
+> agora-client@1.0.0 build
+> vite build
+
+✅ Éxito - Vite encontrado y build completado
+
+
+❌ INCORRECTO (busca para debugging):
+sh: 1: vite: not found  ← Si ves esto, algo sigue mal
+
+
+PASO 8: Testing local (OPCIONAL pero recomendado)
+───────────────────────────────────────────────────
+
+Para probar el build ANTES de pushearlo a Heroku:
+
+# En PowerShell o Git Bash:
+./build.sh
+
+Este script hará lo mismo que Heroku:
+1. Instala server/
+2. Instala client/
+3. Hace build de client/
+
+Si este script falla localmente, verás el error antes de pushear.
+
+
+📞 TROUBLESHOOTING RÁPIDO
+═════════════════════════
+
+Problema: "git push" dice "permission denied"
+Solución: 
+  - Verifica que tengas SSH configurado: ssh -T git@github.com
+  - O usa HTTPS en lugar de SSH: git remote -v
+
+Problema: Heroku build aún falla con "vite: not found"
+Solución:
+  - Verifica que hiciste git push (cambios deben estar en GitHub)
+  - Ejecuta: heroku logs --tail -a tu-app-name
+  - Busca si se ejecutó "npm run install:all"
+
+Problema: No ves el build nuevo en Heroku
+Solución:
+  - Verifica en GitHub que el push llegó
+  - En Heroku Dashboard, en "Deployment", asegúrate que está conectado a GitHub
+  - Verifica que "automatic deploys" está habilitado
+  - Prueba un "Manual Deploy" desde el dashboard
+
+
+✅ LISTA DE VERIFICACIÓN FINAL
+════════════════════════════
+
+- [ ] Git status muestra: modified package.json, .npmrc, heroku.yml
+- [ ] Git commit exitoso
+- [ ] Git push exitoso (sin errores)
+- [ ] Heroku dashboard muestra nuevo build
+- [ ] Logs NO contienen "vite: not found"
+- [ ] Logs contienen "npm run install:all"
+- [ ] Build completó (dice "Deployed" o "View")
+- [ ] App responde en https://tu-app-name.herokuapp.com
+
+
+🎉 ¡Listo!
+
+Una vez que veas "Deployed" en Heroku sin errores de vite, ¡la solución funcionó!
+
+Los siguientes deploys serán más rápidos porque npm cacheará las dependencias.

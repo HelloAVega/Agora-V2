@@ -1,0 +1,202 @@
+================================================================================
+                   SOLUCIÓN: "sh: 1: vite: not found" en Heroku
+================================================================================
+
+🎯 PROBLEMA RAÍZ
+────────────────
+Heroku solo instala npm dependencies en el directorio ROOT.
+Cuando el build intenta ejecutar `vite build` en client/, Vite no existe en
+client/node_modules porque nunca fue instalado allí.
+
+┌─────────────────────────────┐
+│  Estructura de dependencias  │
+├─────────────────────────────┤
+│ root/package.json           │ ← Heroku instala AQUÍ
+│  └─ node_modules/           │ ← Concurrently instalado
+│                             │
+│ client/package.json         │ ← Heroku NO instala aquí
+│  └─ node_modules/           │ ← Vite NO está aquí ❌
+│     (vite debería estar)    │
+│                             │
+│ server/package.json         │ ← Heroku NO instala aquí
+│  └─ node_modules/           │ ← Dependencies NO están aquí ❌
+└─────────────────────────────┘
+
+
+✅ CAMBIOS APLICADOS
+────────────────────
+
+1️⃣  ACTUALIZAR package.json (root)
+   
+   Cambio: engines (Node.js version)
+   ANTES:  "engines": { "node": "18.x", "npm": "9.x" }
+   AHORA:  "engines": { "node": "20.x", "npm": "10.x" }
+   ¿Por qué?: 18.x es End-of-Life, 20.x es LTS actual
+
+   Cambio: Nuevo script install:all
+   AGREGADO:
+   "install:all": "cd server && npm install --production=false && cd ../client && npm install --production=false && cd .."
+   ¿Por qué?: Instala dependencias en AMBAS carpetas explícitamente
+
+   Cambio: heroku-postbuild
+   ANTES:  "heroku-postbuild": "npm run build"
+   AHORA:  "heroku-postbuild": "npm run install:all && npm run build"
+   ¿Por qué?: Primero instala subdirectorios, LUEGO hace build
+
+
+2️⃣  ACTUALIZAR .npmrc (root)
+   
+   Cambio: Agregar legacy-peer-deps
+   AGREGADO: legacy-peer-deps=true
+   ¿Por qué?: Evita warnings y conflictos con peer dependencies
+
+
+3️⃣  ACTUALIZAR heroku.yml
+   
+   Cambio: Agregar config vars de build
+   AGREGADO:
+   config:
+     NPM_CONFIG_PRODUCTION: false
+     BUILDPACK_IGNORE_NODE_MODULES: true
+   ¿Por qué?: Fuerza que npm instale devDependencies
+
+
+4️⃣  CREAR build.sh (script de testing local)
+   
+   ¿Para qué?: Probar el build localmente sin Heroku
+   Uso: ./build.sh
+
+
+📊 COMPARATIVA: ANTES vs DESPUÉS
+────────────────────────────────
+
+ANTES (❌ Fallaba):
+└─ npm install (root only)
+   └─ Concurrently instalado
+   └─ heroku-postbuild: npm run build
+      └─ cd client && npm run build
+         └─ vite build ❌ ERROR: vite: not found
+
+DESPUÉS (✅ Funciona):
+└─ npm install (root only)
+   └─ Concurrently instalado
+   └─ heroku-postbuild: npm run install:all && npm run build
+      ├─ npm run install:all
+      │  ├─ cd server && npm install --production=false
+      │  │  └─ Todas las dependencias de server/ instaladas ✅
+      │  └─ cd client && npm install --production=false
+      │     └─ Vite y todas las dependencias instaladas ✅
+      └─ npm run build
+         └─ cd client && npm run build
+            └─ vite build ✅ Vite encontrado
+
+
+🚀 PASOS PARA APLICAR ESTA SOLUCIÓN
+────────────────────────────────────
+
+1. VERIFICAR CAMBIOS LOCALES
+   ✅ package.json - actualizado (20.x, install:all, heroku-postbuild)
+   ✅ .npmrc - actualizado (legacy-peer-deps=true)
+   ✅ heroku.yml - actualizado (config vars)
+   ✅ build.sh - creado
+
+2. HACER GIT COMMIT
+   $ git add -A
+   $ git commit -m "Fix: Ensure client dependencies installed during Heroku build"
+
+3. HACER GIT PUSH
+   $ git push origin main
+
+4. MONITOREAR HEROKU
+   - Ve a https://dashboard.heroku.com/apps/your-app-name
+   - En "Activity" verás nuevo build
+   - Click en el deploy para ver logs
+   - Busca: "npm run install:all" - debe verse (cd server, cd client)
+   - No debe haber: "sh: 1: vite: not found"
+
+5. VERIFICAR ÉXITO
+   - Logs terminen sin errores
+   - App esté en estado "Deployed"
+   - Accede a https://your-app-name.herokuapp.com
+   - Debe cargar la app
+
+
+⚠️  DEBUGGING SI AÚN FALLA
+──────────────────────────
+
+Ver logs completos:
+$ heroku logs --tail -a your-app-name
+
+Conectarse al dyno (servidor Heroku):
+$ heroku run bash -a your-app-name
+
+Dentro del dyno, verificar:
+$ ls -la client/node_modules/ | grep vite
+$ ls -la server/node_modules/ | head
+$ npm list -g | grep vite
+
+
+📋 ARCHIVOS MODIFICADOS
+───────────────────────
+
+1. package.json (root)
+   - Versiones Node/npm actualizadas
+   - Nuevo script install:all
+   - heroku-postbuild modificado
+
+2. .npmrc (root)
+   - Agregado legacy-peer-deps=true
+
+3. heroku.yml (root)
+   - Agregado NPM_CONFIG_PRODUCTION=false
+   - Agregado BUILDPACK_IGNORE_NODE_MODULES=true
+
+4. build.sh (NUEVO)
+   - Script para testing local
+
+
+💾 LISTA DE CAMBIOS
+───────────────────
+
+[MODIFICADO] package.json
+  ├─ engines.node: 18.x → 20.x
+  ├─ engines.npm: 9.x → 10.x
+  ├─ NEW script "install:all"
+  └─ heroku-postbuild: npm run build → npm run install:all && npm run build
+
+[MODIFICADO] .npmrc
+  └─ + legacy-peer-deps=true
+
+[MODIFICADO] heroku.yml
+  └─ + NPM_CONFIG_PRODUCTION: false
+  └─ + BUILDPACK_IGNORE_NODE_MODULES: true
+
+[CREADO] build.sh
+  └─ Script bash para testing local
+
+
+🎓 POR QUÉ FUNCIONA ESTA SOLUCIÓN
+──────────────────────────────────
+
+1. Heroku ejecuta npm install en root:
+   ✓ Lee heroku.yml y ve NPM_CONFIG_PRODUCTION=false
+   ✓ Instala concurrently (root dependencies)
+
+2. Heroku ejecuta heroku-postbuild:
+   ✓ Este comando AHORA ejecuta "npm run install:all" primero
+   ✓ install:all navega a server/ e instala sus dependencias
+   ✓ install:all navega a client/ e instala sus dependencias
+   ✓ Vite AHORA existe en client/node_modules
+   ✓ Luego ejecuta npm run build
+   ✓ npm run build navega a client/ y ejecuta vite build
+   ✓ Vite FUNCIONA porque fue instalado en el paso anterior
+
+3. Resultado:
+   ✓ client/dist se genera exitosamente
+   ✓ Express sirve client/dist en producción
+   ✓ Deploy exitoso
+
+
+================================================================================
+                          ¡Listo para Deploy! 🚀
+================================================================================
