@@ -1,0 +1,33 @@
+{
+  "name": "agora-v2",
+  "version": "1.0.0",
+  "description": "Ágora - Full-stack application",
+  "main": "server/server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "concurrently \"npm run server:dev\" \"npm run client:dev\"",
+    "build": "npm run client:build && npm run server:build",
+    "client:dev": "cd client && npm run dev",
+    "client:build": "cd client && npm run build",
+    "server:dev": "cd server && npm run dev",
+    "server:build": "cd server && npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "agora",
+    "full-stack",
+    "nodejs",
+    "react"
+  ],
+  "author": "",
+  "license": "MIT"
+}

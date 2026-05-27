@@ -1,0 +1,244 @@
+🎯 CHECKLIST PARA INICIAR ÁGORA V2
+═════════════════════════════════════════════════════════════════════════
+
+📋 REQUISITOS PREVIOS
+─────────────────────────────────────────────────────────────────────
+☐ Node.js 16+ instalado (https://nodejs.org)
+☐ npm 8+ instalado (viene con Node.js)
+☐ PostgreSQL instalado (para desarrollo local)
+☐ Git instalado (para versionado)
+☐ Un editor de código (VS Code recomendado)
+☐ Command Prompt abierto en C:\Users\teamv\Downloads\Agora-V2
+
+
+✅ CONFIGURACIÓN DEL PROYECTO
+─────────────────────────────────────────────────────────────────────
+
+PASO 1: Crear Estructura (1-2 minutos)
+  ☐ Ejecutar: node setup-full.js
+  ☐ Esperar a que termine (2-3 segundos)
+  ☐ Ver mensaje: "✨ Project structure initialized!"
+  ☐ Verificar que se crearon carpetas server/ y client/
+
+PASO 2: Instalar Dependencias (10-15 minutos)
+  ☐ Ejecutar: npm install
+  ☐ Esperar a que termine
+  ☐ Ejecutar: cd server && npm install
+  ☐ Ejecutar: cd ../client && npm install
+  ☐ Ejecutar: cd ..
+  ☐ Verificar: No hay errores en la instalación
+
+PASO 3: Configurar Variables de Ambiente (2 minutos)
+  ☐ Copiar server/.env.example a server/.env
+  ☐ Editar server/.env con tus valores:
+    - NODE_ENV=development
+    - PORT=3001
+    - DATABASE_URL (tu postgres local)
+    - JWT_SECRET (cambiar a algo seguro)
+    - FRONTEND_URL=http://localhost:3000
+    - OPENAI_API_KEY (opcional por ahora)
+  ☐ Guardar .env
+
+
+🚀 DESARROLLO
+─────────────────────────────────────────────────────────────────────
+
+Paso 1: Iniciar Servidores
+  ☐ Ejecutar: npm run dev
+  ☐ Ver output: "Frontend running on http://localhost:3000"
+  ☐ Ver output: "Server running on port 3001"
+  ☐ Esperar a que ambos estén listos
+
+Paso 2: Abrir la Aplicación
+  ☐ Abrir navegador: http://localhost:3000
+  ☐ Ver página de inicio de Ágora
+  ☐ Verificar que carga sin errores
+
+Paso 3: Verificar Backend
+  ☐ Abrir: http://localhost:3001/api/health
+  ☐ Ver respuesta: { "status": "ok", "timestamp": "..." }
+
+
+📁 EXPLORACIÓN DE ESTRUCTURA
+─────────────────────────────────────────────────────────────────────
+
+BACKEND (server/)
+  ☐ server.js - Express app principal
+  ☐ config/ - Configuración de BD
+  ☐ routes/ - Rutas API
+  ☐ controllers/ - Lógica de negocio
+  ☐ middleware/ - Autenticación
+  ☐ models/ - Modelos Sequelize
+  ☐ services/ - Servicios
+  ☐ .env - Variables configuradas
+
+FRONTEND (client/)
+  ☐ src/App.jsx - Componente raíz
+  ☐ src/main.jsx - Entry point React
+  ☐ src/components/ - Componentes reutilizables
+  ☐ src/pages/ - Páginas
+  ☐ src/hooks/ - Custom hooks
+  ☐ src/stores/ - Estado Zustand
+  ☐ src/services/ - API client
+  ☐ src/styles/ - CSS/Tailwind
+  ☐ vite.config.js - Config Vite
+
+
+🧑‍💻 PRÓXIMAS TAREAS DE DESARROLLO
+─────────────────────────────────────────────────────────────────────
+
+CORTO PLAZO (Esta semana)
+  ☐ Explorar estructura del proyecto
+  ☐ Entender cómo funcionan los componentes React
+  ☐ Revisar las rutas Express en server/routes
+  ☐ Crear página de login
+  ☐ Crear página de registro
+  ☐ Implementar autenticación
+
+MEDIANO PLAZO (1-2 semanas)
+  ☐ Conectar con OpenAI API
+  ☐ Implementar chat en tiempo real con WebSockets
+  ☐ Crear componente de chat principal
+  ☐ Implementar historial de conversaciones
+  ☐ Crear dashboard de usuario
+
+LARGO PLAZO (3-4 semanas)
+  ☐ Detección de lenguaje de riesgo
+  ☐ Sistema de alertas para Guardianes
+  ☐ Panel de administración de Guardianes
+  ☐ Testing (Jest, Vitest)
+  ☐ Optimización de rendimiento
+
+
+📚 DOCUMENTACIÓN A REVISAR
+─────────────────────────────────────────────────────────────────────
+
+Orden recomendado:
+  ☐ LEE_PRIMERO.txt (este archivo - guía visual)
+  ☐ START_HERE.md (setup detallado)
+  ☐ README.md (documentación técnica)
+  ☐ GUIA_RAPIDA.txt (referencia rápida)
+  ☐ Especificación Ágora completa (requisitos)
+
+
+🔍 VERIFICACIÓN RÁPIDA
+─────────────────────────────────────────────────────────────────────
+
+Después de npm run dev, verifica:
+
+✓ Frontend carga en localhost:3000
+  ☐ Ves "Ágora - Apoyo Emocional Híbrido"
+  ☐ La página es responsive (funciona en móvil)
+
+✓ Backend responde en localhost:3001
+  ☐ Health check: http://localhost:3001/api/health
+  ☐ Ves respuesta JSON válida
+
+✓ WebSocket conectado
+  ☐ Abre DevTools (F12) → Console
+  ☐ No hay errores de Socket.io
+
+✓ Estilos cargan correctamente
+  ☐ Página tiene colores (morado/azul de Tailwind)
+  ☐ Layout es responsive
+
+
+🛠️ HERRAMIENTAS Y SCRIPTS
+─────────────────────────────────────────────────────────────────────
+
+Scripts raíz (npm run X):
+  ☐ dev - Ambos servidores en paralelo
+  ☐ build - Build para producción
+  ☐ start - Correr en producción
+
+Scripts servidor (cd server && npm run X):
+  ☐ dev - Nodemon auto-reload
+  ☐ start - Producción
+
+Scripts cliente (cd client && npm run X):
+  ☐ dev - Vite dev server
+  ☐ build - Build optimizado
+  ☐ preview - Ver build en local
+
+
+⚠️ ERRORES COMUNES Y SOLUCIONES
+─────────────────────────────────────────────────────────────────────
+
+Port en uso:
+  ☐ Problema: "Port 3000 already in use"
+  ☐ Solución: Cambia PORT en server/.env o cierra app anterior
+
+Módulo no encontrado:
+  ☐ Problema: "Cannot find module 'X'"
+  ☐ Solución: npm install en la carpeta correspondiente
+
+BD no conecta:
+  ☐ Problema: "Connection refused"
+  ☐ Solución: DATABASE_URL incorrecto o PostgreSQL no corriendo
+
+CORS error:
+  ☐ Problema: "CORS policy blocked"
+  ☐ Solución: Verifica FRONTEND_URL en server/.env
+
+Vite error:
+  ☐ Problema: "Cannot find module '@vitejs/plugin-react'"
+  ☐ Solución: cd client && npm install @vitejs/plugin-react
+
+
+🌍 DEPLOY EN HEROKU (DESPUÉS)
+─────────────────────────────────────────────────────────────────────
+
+Cuando esté listo:
+  ☐ Crear cuenta en Heroku (heroku.com)
+  ☐ Push code a GitHub
+  ☐ Heroku Dashboard → New → Create app
+  ☐ Connect → GitHub
+  ☐ Buscar tu repo "Agora-V2"
+  ☐ Enable "Automatic deploys"
+  ☐ Configurar Config Vars:
+    - JWT_SECRET
+    - OPENAI_API_KEY
+  ☐ Deploy!
+
+Resultado:
+  ☐ Cada push a main auto-deploya en Heroku
+  ☐ App en: https://tu-app-name.herokuapp.com
+  ☐ BD: Heroku Postgres (incluida)
+
+
+✨ CHECKLIST FINAL
+─────────────────────────────────────────────────────────────────────
+
+Antes de comenzar a codificar:
+
+  ☐ node setup-full.js ejecutado
+  ☐ npm install completado (todas las carpetas)
+  ☐ .env configurado
+  ☐ npm run dev funciona
+  ☐ Frontend y backend accesibles
+  ☐ Documentación revisada
+  ☐ Estructura entendida
+
+
+🎉 ¡LISTO PARA DESARROLLAR!
+═════════════════════════════════════════════════════════════════════════
+
+Ejecuta ahora:
+
+    node setup-full.js
+
+Luego:
+
+    npm install (todas las carpetas)
+
+Finalmente:
+
+    npm run dev
+
+¡Y comienza a crear Ágora!
+
+
+═════════════════════════════════════════════════════════════════════════
+Ágora V2 - Sistema de Apoyo Emocional Híbrido
+Creado por: HelloAVega | ODS 3 - Salud y Bienestar
+═════════════════════════════════════════════════════════════════════════
