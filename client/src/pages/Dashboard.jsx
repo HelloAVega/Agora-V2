@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ChevronRight, Plus, History } from 'lucide-react'
 
-export default function Dashboard() {
+export default function Dashboard({ onStartChat }) {
   const [stats] = useState({
     totalSessions: 12,
     thisMonth: 5,
@@ -93,7 +93,7 @@ export default function Dashboard() {
 
         {/* Main Action */}
         <div className="mb-12">
-          <button className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-6 px-8 rounded-xl hover:shadow-lg transition transform hover:scale-105 flex items-center justify-center space-x-3 font-semibold text-lg">
+          <button onClick={onStartChat} className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-6 px-8 rounded-xl hover:shadow-lg transition transform hover:scale-105 flex items-center justify-center space-x-3 font-semibold text-lg">
             <Plus className="w-6 h-6" />
             <span>Iniciar Nueva Sesión de Chat</span>
             <ChevronRight className="w-5 h-5" />

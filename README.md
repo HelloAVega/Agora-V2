@@ -34,7 +34,7 @@ PORT=3001
 DATABASE_URL=postgresql://user:pass@localhost:5432/agora
 JWT_SECRET=tu_secreto_jwt_super_seguro_aqui
 FRONTEND_URL=http://localhost:5173
-OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=sk-...
 ```
 
 **client/.env.local**
@@ -140,7 +140,8 @@ Está configurado para deploy automático desde GitHub:
 ```
 DATABASE_URL=postgresql://...  (Auto-asignada si usas Heroku Postgres)
 JWT_SECRET=tu_secreto
-OPENAI_API_KEY=tu_key
+GEMINI_API_KEY=tu_key
+GEMINI_MODEL=gemini-flash-latest
 ```
 
 En Heroku no definas `VITE_API_URL`; el frontend usará el mismo origen HTTPS.
@@ -154,7 +155,8 @@ PORT=3001
 DATABASE_URL=postgresql://user:pass@localhost:5432/agora
 JWT_SECRET=tu_secreto_jwt_super_seguro_aqui
 FRONTEND_URL=http://localhost:5173
-OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=sk-...
+GEMINI_MODEL=gemini-flash-latest
 ```
 
 **client/.env.local:**

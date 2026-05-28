@@ -8,7 +8,7 @@ const { Server } = require('socket.io');
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: { origin: process.env.FRONTEND_URL || 'http://localhost:3000' }
+  cors: { origin: process.env.FRONTEND_URL || 'http://localhost:5173' }
 });
 
 // Middleware
@@ -39,6 +39,8 @@ app.use((req, res, next) => {
 // Auth routes (register / login)
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
+const chatRoutes = require('./routes/chat');
+app.use('/api/chat', chatRoutes);
 
 // WebSocket connection
 io.on('connection', (socket) => {
@@ -59,6 +61,17 @@ const PORT = process.env.PORT || 3001;
 const sequelize = require('./config/database');
 // Load models so sequelize knows about them
 require('./models/user');
+require('./models/chatSession');
+require('./models/chatMessage');
+
+const User = require('./models/user');
+const ChatSession = require('./models/chatSession');
+const ChatMessage = require('./models/chatMessage');
+
+User.hasOne(ChatSession, { foreignKey: 'userId', as: 'chatSession', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+ChatSession.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+ChatSession.hasMany(ChatMessage, { foreignKey: 'chatSessionId', as: 'messages', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+ChatMessage.belongsTo(ChatSession, { foreignKey: 'chatSessionId', as: 'session' });
 
 (async () => {
   try {

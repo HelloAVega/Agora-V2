@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     container_name: agora-dev
+    env_file:
+      - ./server/.env
     depends_on:
       - postgres
     ports:
@@ -20,7 +22,8 @@ services:
       - PORT=5000
       - VITE_API_URL=http://localhost:5000
       - DATABASE_URL=postgresql://agora_user:agora_password@postgres:5432/agora_db
-    command: npm run dev
+      - GEMINI_MODEL=gemini-flash-latest
+    command: sh -lc "npm install && cd server && npm install && cd ../client && npm install && cd /app && npm run dev"
     restart: unless-stopped
 
   # PostgreSQL Database for Docker development
