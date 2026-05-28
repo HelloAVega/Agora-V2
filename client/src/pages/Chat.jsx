@@ -185,7 +185,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
   }
 
   return (
-    <div className="h-[calc(100dvh-4.5rem-env(safe-area-inset-bottom,0px))] min-h-[540px] flex flex-col bg-gradient-to-b from-purple-50 via-white to-indigo-50 rounded-none overflow-hidden">
+    <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] min-h-[540px] flex flex-col bg-gradient-to-b from-purple-50 via-white to-indigo-50 rounded-none overflow-hidden">
       <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-purple-200 bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-700 text-white shadow-sm">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-full bg-white/15 text-white flex items-center justify-center shadow-sm flex-shrink-0">
