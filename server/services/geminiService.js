@@ -48,9 +48,10 @@ async function generateReply(history) {
         parts: [{ text: message.content }],
       })),
       generationConfig: {
-        temperature: 0.6,
-        topP: 0.95,
-        maxOutputTokens: 1024,
+        temperature: 0.15,
+        topP: 0.9,
+        maxOutputTokens: 1200,
+        candidateCount: 1,
       },
     }),
   })
@@ -62,12 +63,36 @@ async function generateReply(history) {
     throw error
   }
 
-  const text = payload?.candidates?.[0]?.content?.parts?.map((part) => part.text || '').join('').trim()
+  let text = payload?.candidates?.[0]?.content?.parts?.map((part) => part.text || '').join('').trim()
   if (!text) {
     const error = new Error('Gemini no devolvió una respuesta válida')
     error.statusCode = 502
     throw error
   }
+
+    // Post-process: if model echoed context and produced multiple summaries, keep only the last '#### Resumen automático' block.
+    try {
+      const marker = '#### Resumen automático'
+      if (text.includes(marker)) {
+        const idx = text.lastIndexOf(marker)
+        text = text.slice(idx).trim()
+      }
+      // Remove accidental UI labels or button text that might have been included
+      text = text.replace(/Generar recomendaci[oó]n con IA/gi, '').trim()
+
+      // Remove leading wrapper headings like '##### Recomendación generada' if present
+      text = text.replace(/^\s*#{1,6}\s*Recomendaci[oó]n(es)?\s*generada\s*/i, '').trim()
+
+      // If the text starts with the '#### Resumen automático' header followed by an 'Entradas totales' line,
+      // remove those lines so only the meaningful body (recomendaciones/mini-plan) remains.
+      text = text.replace(/^\s*####\s*Resumen\s*autom[aá]tico\s*/i, '').trim()
+      text = text.replace(/^\s*Entradas\s+totales\s*:\s*\d+\s*/i, '').trim()
+
+      // Trim any leading blank lines
+      text = text.replace(/^\s+/, '')
+    } catch (e) {
+      // ignore postprocess errors and return original text
+    }
 
   return { text, model: DEFAULT_MODEL }
 }

@@ -1,4 +1,5 @@
 const sequelize = require('../config/database')
+const { Op } = require('sequelize')
 const ChatSession = require('../models/chatSession')
 const ChatMessage = require('../models/chatMessage')
 const { generateReply, DEFAULT_MODEL } = require('../services/geminiService')
@@ -50,14 +51,16 @@ async function getOrCreateSession(userId, sessionId = null) {
     if (selected) return selected
   }
 
+  // Return the most recent session only if it has at least one message (lastMessageAt set)
   const latest = await ChatSession.findOne({
-    where: { userId },
+    where: { userId, lastMessageAt: { [require('sequelize').Op.ne]: null } },
     order: [['lastMessageAt', 'DESC'], ['updatedAt', 'DESC'], ['createdAt', 'DESC']],
   })
 
   if (latest) return latest
 
-  return ChatSession.create({ userId, title: 'Nuevo chat' })
+  // Do not auto-create an empty session here; caller can create a session when saving first message.
+  return null
 }
 
 function mapMessage(message) {
@@ -75,16 +78,17 @@ async function getThread(req, res) {
 
   try {
     const session = await getOrCreateSession(req.user.id, req.query.sessionId || null)
+    if (!session) {
+      return res.json({ session: null, messages: [] })
+    }
+
     const messages = await ChatMessage.findAll({
       where: { chatSessionId: session.id },
       order: [['createdAt', 'ASC']],
       limit: 200,
     })
 
-    return res.json({
-      session: serializeSession(session),
-      messages: messages.map(mapMessage),
-    })
+    return res.json({ session: serializeSession(session), messages: messages.map(mapMessage) })
   } catch (err) {
     console.error('GetThread error', err)
     return res.status(500).json({ message: 'Server error' })
@@ -124,13 +128,8 @@ async function createSession(req, res) {
   if (!req.user) return res.status(401).json({ message: 'Unauthorized' })
 
   try {
-    const session = await ChatSession.create({
-      userId: req.user.id,
-      title: 'Nuevo chat',
-      lastMessageAt: null,
-    })
-
-    return res.status(201).json({ session: serializeSession(session) })
+    // Do not persist an empty session. Return null to indicate a new ephemeral session on client.
+    return res.status(200).json({ session: null })
   } catch (err) {
     console.error('CreateSession error', err)
     return res.status(500).json({ message: 'Server error' })
@@ -146,7 +145,11 @@ async function sendMessage(req, res) {
   }
 
   try {
-    const session = await getOrCreateSession(req.user.id, sessionId || null)
+    let session = await getOrCreateSession(req.user.id, sessionId || null)
+    // If no session exists (no previous messages), create a new one now to attach the incoming messages
+    if (!session) {
+      session = await ChatSession.create({ userId: req.user.id, title: 'Nuevo chat', lastMessageAt: null })
+    }
 
     const recentMessages = await ChatMessage.findAll({
       where: { chatSessionId: session.id },

@@ -3,6 +3,9 @@ import { ChevronRight, Plus, History } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '../stores/authStore'
 import { createChatSession, getChatSessions } from '../services/chatService'
+import Checkin from '../components/Checkin'
+import SummaryPanel from '../components/SummaryPanel'
+import Timeline from '../components/Timeline'
 
 export default function Dashboard({ onOpenSession, onCreateSession }) {
   const token = useAuthStore((s) => s.token)
@@ -82,9 +85,14 @@ export default function Dashboard({ onOpenSession, onCreateSession }) {
     setCreating(true)
     try {
       const data = onCreateSession ? await onCreateSession() : await createChatSession(token)
-      const session = data.session || data
-      setSessions((current) => [session, ...current])
-      onOpenSession?.(session.id)
+      const session = data && data.session ? data.session : null
+      if (session && session.id) {
+        setSessions((current) => [session, ...current])
+        onOpenSession?.(session.id)
+      } else {
+        // No session persisted yet (ephemeral) — open chat view without session id
+        onOpenSession?.()
+      }
     } catch (err) {
       const msg = err?.response?.data?.message || 'No se pudo crear un nuevo chat'
       toast.error(msg)
@@ -156,6 +164,10 @@ export default function Dashboard({ onOpenSession, onCreateSession }) {
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
+          <div className="space-y-4 mb-6">
+            <Checkin onSaved={() => { /* reload insights later if needed */ }} />
+            <SummaryPanel />
+          </div>
 
         {/* Recent Sessions */}
         <div>
@@ -211,6 +223,9 @@ export default function Dashboard({ onOpenSession, onCreateSession }) {
             y supervisado. Si necesitas ayuda inmediata, siempre puedes 
             comunicarte con un profesional de salud mental.
           </p>
+        </div>
+        <div className="mt-6">
+          <Timeline />
         </div>
       </div>
     </div>

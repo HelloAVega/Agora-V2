@@ -41,6 +41,8 @@ const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 const chatRoutes = require('./routes/chat');
 app.use('/api/chat', chatRoutes);
+const moodRoutes = require('./routes/mood');
+app.use('/api/mood', moodRoutes);
 
 // WebSocket connection
 io.on('connection', (socket) => {
@@ -63,6 +65,7 @@ const sequelize = require('./config/database');
 require('./models/user');
 require('./models/chatSession');
 require('./models/chatMessage');
+require('./models/moodEntry');
 
 const User = require('./models/user');
 const ChatSession = require('./models/chatSession');
@@ -72,6 +75,10 @@ User.hasMany(ChatSession, { foreignKey: 'userId', as: 'chatSessions', onDelete: 
 ChatSession.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 ChatSession.hasMany(ChatMessage, { foreignKey: 'chatSessionId', as: 'messages', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 ChatMessage.belongsTo(ChatSession, { foreignKey: 'chatSessionId', as: 'session' });
+
+const MoodEntry = require('./models/moodEntry');
+User.hasMany(MoodEntry, { foreignKey: 'userId', as: 'moodEntries', onDelete: 'CASCADE' });
+MoodEntry.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 (async () => {
   try {

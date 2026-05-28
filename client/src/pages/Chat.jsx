@@ -61,10 +61,14 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
         if (!resolvedSessionId) {
           const created = await (onCreateSession ? onCreateSession() : createChatSession(token))
           if (!mounted) return
-          const createdSession = created.session || created
-          resolvedSessionId = createdSession.id
-          setSessions((current) => [createdSession, ...current])
-          onSessionChange?.(resolvedSessionId)
+          const createdSession = created && created.session ? created.session : null
+          if (createdSession && createdSession.id) {
+            resolvedSessionId = createdSession.id
+            setSessions((current) => [createdSession, ...current])
+            onSessionChange?.(resolvedSessionId)
+          } else {
+            resolvedSessionId = null
+          }
         }
 
         const thread = await getChatThread(token, resolvedSessionId)
@@ -144,12 +148,19 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
     if (!token || loading) return
     try {
       const data = await (onCreateSession ? onCreateSession() : createChatSession(token))
-      const newSession = data.session || data
-      setSessions((current) => [newSession, ...current])
-      setCurrentSession(newSession)
-      setMessages([])
-      onSessionChange?.(newSession.id)
-      toast.success('Nuevo chat creado')
+      const newSession = data && data.session ? data.session : null
+      if (newSession && newSession.id) {
+        setSessions((current) => [newSession, ...current])
+        setCurrentSession(newSession)
+        setMessages([])
+        onSessionChange?.(newSession.id)
+        toast.success('Nuevo chat creado')
+      } else {
+        // Ephemeral chat: open UI without persisting until first message
+        setCurrentSession(null)
+        setMessages([])
+        onSessionChange?.(null)
+      }
     } catch (err) {
       const msg = err?.response?.data?.message || 'No se pudo crear un nuevo chat'
       toast.error(msg)

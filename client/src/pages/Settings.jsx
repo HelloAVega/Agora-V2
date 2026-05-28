@@ -139,64 +139,85 @@ export default function Settings() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-gray-200">
-      <h2 className="text-2xl font-bold mb-4">Ajustes</h2>
-
-      <div className="mb-6 flex items-center gap-4">
-        <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 ring-2 ring-indigo-100 shadow-sm flex items-center justify-center flex-shrink-0">
-          {user?.avatar ? (
-            <img src={getAvatarSrc(user.avatar)} alt={user.name || 'Avatar'} className="w-full h-full object-cover object-center" />
-          ) : (
-            <span className="text-xl text-gray-700">{(user?.name || user?.email || 'U').charAt(0).toUpperCase()}</span>
-          )}
-        </div>
-        <div>
-          <h3 className="text-sm font-medium text-gray-600">Cuenta</h3>
-          <p className="text-gray-800 mt-2 font-semibold">{user ? (user.name || user.email) : 'No autenticado'}</p>
-          <p className="text-sm text-gray-500">{user ? user.email : ''}</p>
-          <div className="mt-2">
-            <label className="inline-flex items-center gap-2 cursor-pointer">
-              <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
-              <span className="px-3 py-2 bg-gray-100 rounded text-sm">{uploading ? 'Subiendo...' : 'Cambiar foto'}</span>
-            </label>
-          </div>
-        </div>
+    <div className="max-w-4xl mx-auto bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-gray-200">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold">Ajustes</h2>
+        <div className="text-sm text-gray-500">Gestiona tu cuenta y preferencias</div>
       </div>
 
-      <form onSubmit={handleUpdateProfile} className="space-y-4 mb-6">
-        <label className="block">
-          <span className="text-sm text-gray-600">Nombre</span>
-          <input className="w-full p-2 border rounded mt-1" value={name} onChange={(e)=>setName(e.target.value)} />
-        </label>
-        <label className="block">
-          <span className="text-sm text-gray-600">Email</span>
-          <input className="w-full p-2 border rounded mt-1" value={email} onChange={(e)=>setEmail(e.target.value)} />
-        </label>
-        <div className="flex gap-3">
-          <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded">Guardar perfil</button>
-        </div>
-      </form>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: avatar + account summary */}
+        <div className="space-y-4">
+          <div className="flex flex-col items-center bg-gray-50 rounded-lg p-4 border border-gray-100">
+            <div className="w-28 h-28 rounded-full overflow-hidden bg-gray-100 ring-2 ring-indigo-100 shadow-sm flex items-center justify-center mb-3">
+              {user?.avatar ? (
+                <img src={getAvatarSrc(user.avatar)} alt={user.name || 'Avatar'} className="w-full h-full object-cover object-center" />
+              ) : (
+                <span className="text-3xl text-gray-700">{(user?.name || user?.email || 'U').charAt(0).toUpperCase()}</span>
+              )}
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-gray-600">Cuenta</div>
+              <div className="font-semibold text-gray-900 mt-1">{user ? (user.name || user.email) : 'No autenticado'}</div>
+              <div className="text-xs text-gray-500">{user ? user.email : ''}</div>
+            </div>
+            <label className="mt-3">
+              <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
+              <div className="mt-2 inline-flex items-center gap-2 px-3 py-2 bg-white border rounded cursor-pointer text-sm">
+                {uploading ? 'Subiendo...' : 'Cambiar foto'}
+              </div>
+            </label>
+          </div>
 
-      <form onSubmit={handleChangePassword} className="space-y-4 mb-6">
-        <h3 className="text-sm font-medium text-gray-600">Cambiar contraseña</h3>
-        <input type="password" placeholder="Contraseña actual" className="w-full p-2 border rounded" value={currentPassword} onChange={(e)=>setCurrentPassword(e.target.value)} />
-        <input type="password" placeholder="Nueva contraseña" className="w-full p-2 border rounded" value={newPassword} onChange={(e)=>setNewPassword(e.target.value)} />
-        <div className="mt-2 text-sm text-gray-600">
-          {getPasswordScore(newPassword).label}
-          <div className="w-full bg-gray-200 h-2 rounded mt-1">
-            <div
-              style={{ width: `${(getPasswordScore(newPassword).score / 4) * 100}%` }}
-              className="h-2 rounded bg-gradient-to-r from-emerald-400 to-indigo-600"
-            />
+          <div className="bg-white rounded-lg p-4 border border-gray-100">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Seguridad</h4>
+            <button onClick={()=>setShowConfirm(true)} className="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition">Cerrar sesión</button>
           </div>
         </div>
-        <button type="submit" className="bg-emerald-600 text-white px-4 py-2 rounded">Cambiar contraseña</button>
-      </form>
 
-      {statusMsg && <div className="text-sm text-indigo-700 mb-4">{statusMsg}</div>}
+        {/* Middle: profile form */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white rounded-lg p-6 border border-gray-100">
+            <h3 className="text-lg font-semibold mb-3">Perfil</h3>
+            <form onSubmit={handleUpdateProfile} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+              <div>
+                <label className="block text-sm text-gray-600">Nombre</label>
+                <input className="w-full p-2 border rounded mt-1" value={name} onChange={(e)=>setName(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600">Email</label>
+                <input className="w-full p-2 border rounded mt-1" value={email} onChange={(e)=>setEmail(e.target.value)} />
+              </div>
+              <div className="md:col-span-2 flex items-center gap-3">
+                <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded">Guardar perfil</button>
+                {statusMsg && <div className="text-sm text-indigo-700">{statusMsg}</div>}
+              </div>
+            </form>
+          </div>
 
-      <div className="space-y-3">
-        <button onClick={()=>setShowConfirm(true)} className="w-full bg-red-600 text-white py-3 rounded hover:bg-red-700 transition font-medium">Cerrar sesión</button>
+          <div className="bg-white rounded-lg p-6 border border-gray-100">
+            <h3 className="text-lg font-semibold mb-3">Cambiar contraseña</h3>
+            <form onSubmit={handleChangePassword} className="space-y-3">
+              <div>
+                <label className="block text-sm text-gray-600">Contraseña actual</label>
+                <input type="password" placeholder="Contraseña actual" className="w-full p-2 border rounded mt-1" value={currentPassword} onChange={(e)=>setCurrentPassword(e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600">Nueva contraseña</label>
+                <input type="password" placeholder="Nueva contraseña" className="w-full p-2 border rounded mt-1" value={newPassword} onChange={(e)=>setNewPassword(e.target.value)} />
+                <div className="mt-2 flex items-center justify-between">
+                  <div className="text-sm text-gray-600">{getPasswordScore(newPassword).label}</div>
+                  <div className="w-1/2 bg-gray-200 h-2 rounded">
+                    <div style={{ width: `${(getPasswordScore(newPassword).score / 4) * 100}%` }} className="h-2 rounded bg-gradient-to-r from-emerald-400 to-indigo-600" />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <button type="submit" className="bg-emerald-600 text-white px-4 py-2 rounded">Cambiar contraseña</button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
 
       {showConfirm && (
