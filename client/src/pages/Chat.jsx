@@ -185,7 +185,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
   }
 
   return (
-    <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] min-h-0 flex flex-col bg-gradient-to-b from-purple-50 via-white to-indigo-50 rounded-none overflow-hidden">
+    <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] min-h-0 flex flex-col bg-white overflow-hidden">
       <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-purple-200 bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-700 text-white shadow-sm">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-full bg-white/15 text-white flex items-center justify-center shadow-sm flex-shrink-0">
@@ -193,7 +193,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
           </div>
           <div className="min-w-0">
             <h2 className="text-lg font-semibold text-white truncate">{currentSession?.title || 'Chat con Ágora'}</h2>
-            <p className="text-xs text-purple-100 truncate">{currentSession?.preview || (user?.name ? `Hola ${user.name}` : 'Conversación activa')}</p>
+            <p className="text-xs text-white/90 truncate">{currentSession?.preview || (user?.name ? `Hola ${user.name}` : 'Conversación activa')}</p>
           </div>
         </div>
 
@@ -201,14 +201,17 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
           <button
             type="button"
             onClick={handleCreateNewChat}
-            className="rounded-full bg-white/15 px-3 py-2 text-sm font-semibold text-white hover:bg-white/25 transition"
+            className="rounded-full bg-white/15 px-3 py-2 text-sm font-semibold text-white hover:bg-white/25 transition flex items-center gap-2"
           >
+            <span className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-white">
+              <Sparkles className="w-4 h-4 text-white" />
+            </span>
             Crear nuevo chat
           </button>
         </div>
       </div>
 
-      <div className="border-b border-purple-100 bg-white/80 px-4 sm:px-6 py-3">
+      <div className="border-b border-gray-100 bg-white px-4 sm:px-6 py-3">
         <div className="flex items-center justify-between gap-3 mb-3">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Sesiones recientes</h3>
           <span className="text-xs text-gray-400">{sessions.length} chat{sessions.length === 1 ? '' : 's'}</span>
@@ -228,7 +231,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
       </div>
 
       <div className="flex-1 min-h-0 px-3 sm:px-4 pt-3 sm:pt-4 pb-3 sm:pb-4 flex flex-col gap-3">
-        <div className="flex-1 min-h-0 overflow-y-auto rounded-3xl border border-white/70 bg-white/90 px-4 sm:px-6 py-4 sm:py-5 space-y-4 shadow-[0_10px_35px_rgba(0,0,0,0.06)] bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.08),_transparent_38%)]">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 space-y-4 bg-white border border-gray-100">
           {loadingThread && (
             <div className="text-sm text-gray-500 flex items-center gap-2">
               <MessagesSquare className="w-4 h-4" />
@@ -249,7 +252,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
             return (
               <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                 {isTyping ? (
-                  <div className="rounded-2xl rounded-bl-md border border-gray-200 bg-white px-4 py-3 shadow-sm">
+                    <div className="rounded-md rounded-bl-md border border-gray-200 bg-white px-4 py-3">
                     <div className="flex items-center gap-1">
                       <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.2s]" />
                       <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.1s]" />
@@ -258,7 +261,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
                     </div>
                   </div>
                 ) : (
-                  <div className={`max-w-[88%] sm:max-w-[72%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${isUser ? 'bg-indigo-600 text-white rounded-br-md' : 'bg-white text-gray-800 border border-gray-200 rounded-bl-md'}`}>
+                    <div className={`max-w-[88%] sm:max-w-[72%] rounded-md px-4 py-3 text-sm leading-relaxed ${isUser ? 'bg-indigo-600 text-white rounded-br-md' : 'bg-white text-gray-800 border border-gray-200 rounded-bl-md'}`}>
                     {isUser ? (
                       <p className="whitespace-pre-wrap">{message.content}</p>
                     ) : (
@@ -276,7 +279,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
           <div ref={bottomRef} />
         </div>
 
-        <div className="shrink-0 rounded-3xl border border-white/70 bg-white/95 px-3 sm:px-4 py-3 sm:py-3.5 shadow-[0_10px_35px_rgba(0,0,0,0.05)] backdrop-blur-sm">
+        <div className="shrink-0 border-t border-gray-100 bg-white px-3 sm:px-4 py-3 sm:py-3.5">
           <form onSubmit={handleSubmit}>
             <div className="flex items-end gap-3">
               <textarea
