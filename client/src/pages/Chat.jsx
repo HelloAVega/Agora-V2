@@ -16,8 +16,11 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
   const [loading, setLoading] = useState(false)
   const [loadingThread, setLoadingThread] = useState(true)
   const [keyboardOpen, setKeyboardOpen] = useState(false)
+  const [keyboardInset, setKeyboardInset] = useState(0)
+  const [composerHeight, setComposerHeight] = useState(0)
   const bottomRef = useRef(null)
   const textareaRef = useRef(null)
+  const composerRef = useRef(null)
 
   const resizeTextarea = () => {
     const element = textareaRef.current
@@ -111,7 +114,9 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
       const visualHeight = viewport.height
       const layoutHeight = window.innerHeight
       const open = layoutHeight - visualHeight > threshold
+      const inset = Math.max(0, layoutHeight - visualHeight - viewport.offsetTop)
       setKeyboardOpen(open)
+      setKeyboardInset(open ? inset : 0)
       onKeyboardChange?.(open)
     }
 
@@ -125,6 +130,26 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
       onKeyboardChange?.(false)
     }
   }, [onKeyboardChange])
+
+  useEffect(() => {
+    const element = composerRef.current
+    if (!element) return undefined
+
+    const syncHeight = () => {
+      setComposerHeight(element.offsetHeight || 0)
+    }
+
+    syncHeight()
+
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', syncHeight)
+      return () => window.removeEventListener('resize', syncHeight)
+    }
+
+    const observer = new ResizeObserver(syncHeight)
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [keyboardOpen])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -253,7 +278,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
       </div>
 
       <div className="flex-1 min-h-0 flex flex-col bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.10),_transparent_38%)]">
-        <div className={`flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 ${keyboardOpen ? 'pb-2 scroll-pb-4' : 'pb-[calc(6rem+env(safe-area-inset-bottom,0px))] scroll-pb-24'} space-y-4`}>
+        <div className={`flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 ${keyboardOpen ? 'scroll-pb-4' : 'scroll-pb-24'} space-y-4`} style={{ paddingBottom: keyboardOpen ? `${composerHeight + keyboardInset + 24}px` : undefined }}>
           {loadingThread && (
             <div className="text-sm text-gray-500 flex items-center gap-2">
               <MessagesSquare className="w-4 h-4" />
@@ -302,9 +327,17 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
         </div>
 
         <form
+          ref={composerRef}
           onSubmit={handleSubmit}
-          className={`border-t border-gray-200 bg-white/95 backdrop-blur-sm transition-[padding,transform,box-shadow,border-radius] duration-300 ease-out ${keyboardOpen ? 'px-3 pt-2 pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))] shadow-[0_-14px_35px_rgba(0,0,0,0.10)] rounded-t-3xl border-x border-gray-100' : 'p-3 sm:p-4'}`}
-          style={{ transform: keyboardOpen ? 'translateY(-4px)' : 'translateY(0)' }}
+          className={`border-t border-gray-200 bg-white/95 backdrop-blur-sm transition-[padding,transform,box-shadow,border-radius,left,right,bottom] duration-300 ease-out ${keyboardOpen ? 'px-3 pt-2 pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))] shadow-[0_-14px_35px_rgba(0,0,0,0.10)] rounded-t-3xl border-x border-gray-100' : 'p-3 sm:p-4'}`}
+          style={keyboardOpen ? {
+            position: 'fixed',
+            left: 0,
+            right: 0,
+            bottom: `calc(${keyboardInset}px + env(safe-area-inset-bottom, 0px))`,
+            zIndex: 40,
+            transform: 'translateY(-2px)',
+          } : { transform: 'translateY(0)' }}
         >
           <div className="flex items-end gap-3 transition-transform duration-300 ease-out" style={{ transform: keyboardOpen ? 'translateY(-2px)' : 'translateY(0)' }}>
             <textarea
