@@ -185,7 +185,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
   }
 
   return (
-    <div className="h-[calc(100dvh-4rem-env(safe-area-inset-bottom,0px))] min-h-[540px] flex flex-col bg-gradient-to-b from-purple-50 via-white to-indigo-50 rounded-none overflow-hidden">
+    <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] min-h-[540px] flex flex-col bg-gradient-to-b from-purple-50 via-white to-indigo-50 rounded-none overflow-hidden">
       <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-purple-200 bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-700 text-white shadow-sm">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-full bg-white/15 text-white flex items-center justify-center shadow-sm flex-shrink-0">
@@ -228,7 +228,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
       </div>
 
       <div className="flex-1 min-h-0 flex flex-col bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.10),_transparent_38%)]">
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 pb-2 sm:pb-3 space-y-4 scroll-pb-6">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 pb-0 space-y-4 scroll-pb-2">
           {loadingThread && (
             <div className="text-sm text-gray-500 flex items-center gap-2">
               <MessagesSquare className="w-4 h-4" />
@@ -276,7 +276,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
           <div ref={bottomRef} />
         </div>
 
-        <form onSubmit={handleSubmit} className="border-t border-gray-200 bg-white/95 backdrop-blur-sm p-2.5 sm:p-3">
+        <form onSubmit={handleSubmit} className="border-t border-gray-200 bg-white/95 backdrop-blur-sm p-2 sm:p-2.5">
           <div className="flex items-end gap-3">
             <textarea
               ref={textareaRef}
