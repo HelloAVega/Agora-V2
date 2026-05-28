@@ -32,8 +32,18 @@ export default function Settings() {
 
   const getAvatarSrc = (avatar) => {
     if (!avatar) return null
-    if (/^https?:\/\//i.test(avatar)) return avatar
-    const baseUrl = API.defaults?.baseURL || ''
+    // If it is an absolute URL, normalize it to the current origin when it points
+    // to localhost, otherwise keep the original URL.
+    if (/^https?:\/\//i.test(avatar)) {
+      try {
+        const parsed = new URL(avatar)
+        if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+          return `${window.location.origin}${parsed.pathname}`
+        }
+      } catch (e) {}
+      return avatar
+    }
+    const baseUrl = API.defaults?.baseURL || window.location.origin
     return `${baseUrl}${avatar}`
   }
 
