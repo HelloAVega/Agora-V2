@@ -50,18 +50,10 @@ export default function Dashboard() {
   return (
     <div className="max-w-3xl mx-auto">
       <div className="space-y-8">
-        {/* Welcome Section */}
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Bienvenido/a de nuevo
-          </h2>
-          <p className="text-lg text-gray-600">
-            ¿Cómo te sientes hoy?
-          </p>
-        </div>
+        {/* Welcome Section removed for cleaner UI */}
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           <div className="bg-white rounded-lg p-6 shadow-sm border border-indigo-100">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-600">Total de Sesiones</span>

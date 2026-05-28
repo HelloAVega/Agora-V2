@@ -18,11 +18,17 @@ app.use(express.json());
 // Serve static files from React build
 const buildPath = path.join(__dirname, '../client/dist');
 app.use(express.static(buildPath));
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 
 // API routes
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Auth routes (register / login)
+const authRoutes = require('./routes/auth');
+app.use('/api/auth', authRoutes);
 
 // WebSocket connection
 io.on('connection', (socket) => {
@@ -38,9 +44,26 @@ app.get('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-httpServer.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-  console.log(`📱 Frontend serving from: ${buildPath}`);
-});
+
+// Initialize DB and then start server
+const sequelize = require('./config/database');
+// Load models so sequelize knows about them
+require('./models/user');
+
+(async () => {
+  try {
+    await sequelize.authenticate();
+    // Use alter to update DB schema with new fields (adds `avatar` if missing)
+    await sequelize.sync({ alter: true });
+    console.log('✅ Database connected and synced');
+  } catch (err) {
+    console.error('Database connection failed:', err.message || err);
+  }
+
+  httpServer.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`📱 Frontend serving from: ${buildPath}`);
+  });
+})();
 
 module.exports = { app, io };

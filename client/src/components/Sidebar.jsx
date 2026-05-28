@@ -1,8 +1,11 @@
 import { Home, MessageCircle, BarChart3, Settings, LogOut } from 'lucide-react'
 import { useState } from 'react'
+import { useAuthStore } from '../stores/authStore'
 
 export default function Sidebar({ activeTab, setActiveTab }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const logout = useAuthStore((s) => s.logout)
+  const user = useAuthStore((s) => s.user)
 
   const menuItems = [
     { id: 'home', label: 'Inicio', icon: Home },
@@ -20,7 +23,10 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             <div className="w-10 h-10 bg-indigo-400 rounded-lg flex items-center justify-center font-bold">
               Á
             </div>
-            <h1 className="text-xl font-bold">Ágora</h1>
+            <div>
+              <h1 className="text-xl font-bold">Ágora</h1>
+              {user && <p className="text-sm text-indigo-200 truncate">{user.name || user.email}</p>}
+            </div>
           </div>
         )}
         {isCollapsed && (
@@ -55,7 +61,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
 
       {/* Bottom Actions */}
       <div className="p-4 border-t border-indigo-700 space-y-2">
-        <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-indigo-700 transition text-indigo-100">
+        <button onClick={() => logout()} className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-indigo-700 transition text-indigo-100">
           <LogOut className="w-5 h-5 flex-shrink-0" />
           {!isCollapsed && <span className="text-sm font-medium">Salir</span>}
         </button>
