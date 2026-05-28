@@ -10,12 +10,15 @@ const ChatSession = sequelize.define('ChatSession', {
   userId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    unique: true,
   },
   title: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: 'Chat con Ágora',
+    defaultValue: 'Nuevo chat',
+  },
+  lastMessageAt: {
+    type: DataTypes.DATE,
+    allowNull: true,
   },
 }, {
   tableName: 'chat_sessions',

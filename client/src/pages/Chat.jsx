@@ -4,12 +4,14 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import toast from 'react-hot-toast'
 import { useAuthStore } from '../stores/authStore'
-import { getChatThread, sendChatMessage } from '../services/chatService'
+import { createChatSession, getChatSessions, getChatThread, sendChatMessage } from '../services/chatService'
 
-export default function Chat() {
+export default function Chat({ sessionId, onSessionChange, onCreateSession, onOpenSession }) {
   const token = useAuthStore((s) => s.token)
   const user = useAuthStore((s) => s.user)
   const [messages, setMessages] = useState([])
+  const [sessions, setSessions] = useState([])
+  const [currentSession, setCurrentSession] = useState(null)
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [loadingThread, setLoadingThread] = useState(true)
@@ -31,31 +33,6 @@ export default function Chat() {
     element.style.overflowY = element.scrollHeight > maxHeight ? 'auto' : 'hidden'
   }
 
-  useEffect(() => {
-    let mounted = true
-
-    async function loadThread() {
-      if (!token) return
-      setLoadingThread(true)
-      try {
-        const data = await getChatThread(token)
-        if (!mounted) return
-        setMessages(data.messages || [])
-      } catch (err) {
-          if (err?.response?.status === 401) return
-        const msg = err?.response?.data?.message || 'No se pudo cargar el chat'
-        toast.error(msg)
-      } finally {
-        if (mounted) setLoadingThread(false)
-      }
-    }
-
-    loadThread()
-    return () => {
-      mounted = false
-    }
-  }, [token])
-
   const markdownComponents = {
     p: ({ children }) => <p className="mb-2 last:mb-0 whitespace-pre-wrap">{children}</p>,
     ul: ({ children }) => <ul className="mb-2 ml-5 list-disc space-y-1 last:mb-0">{children}</ul>,
@@ -67,6 +44,50 @@ export default function Chat() {
       <blockquote className="mb-2 border-l-4 border-indigo-200 pl-3 italic text-gray-600 last:mb-0">{children}</blockquote>
     ),
   }
+
+  useEffect(() => {
+    let mounted = true
+
+    async function loadConversation() {
+      if (!token) return
+      setLoadingThread(true)
+      try {
+        const sessionsData = await getChatSessions(token)
+        if (!mounted) return
+        const availableSessions = sessionsData.sessions || []
+        setSessions(availableSessions)
+
+        let resolvedSessionId = sessionId || availableSessions[0]?.id || null
+        if (!resolvedSessionId) {
+          const created = await (onCreateSession ? onCreateSession() : createChatSession(token))
+          if (!mounted) return
+          const createdSession = created.session || created
+          resolvedSessionId = createdSession.id
+          setSessions((current) => [createdSession, ...current])
+          onSessionChange?.(resolvedSessionId)
+        }
+
+        const thread = await getChatThread(token, resolvedSessionId)
+        if (!mounted) return
+        setCurrentSession(thread.session || null)
+        setMessages(thread.messages || [])
+        if (resolvedSessionId && resolvedSessionId !== sessionId) {
+          onSessionChange?.(resolvedSessionId)
+        }
+      } catch (err) {
+        if (err?.response?.status === 401) return
+        const msg = err?.response?.data?.message || 'No se pudo cargar el chat'
+        toast.error(msg)
+      } finally {
+        if (mounted) setLoadingThread(false)
+      }
+    }
+
+    loadConversation()
+    return () => {
+      mounted = false
+    }
+  }, [token, sessionId, onCreateSession, onSessionChange])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -88,12 +109,26 @@ export default function Chat() {
     setMessages((current) => [...current, tempUserMessage, tempAssistantMessage])
 
     try {
-      const data = await sendChatMessage(text, token)
+      const data = await sendChatMessage(text, token, sessionId)
+      if (data?.session?.id && data.session.id !== sessionId) {
+        onSessionChange?.(data.session.id)
+        setCurrentSession(data.session)
+      }
       setMessages((current) =>
         current
           .filter((message) => message.id !== tempUserMessage.id && message.id !== tempAssistantMessage.id)
           .concat([data.userMessage, data.assistantMessage])
       )
+      if (data?.session) {
+        setCurrentSession(data.session)
+      }
+      if (data?.session?.title) {
+        setSessions((current) => {
+          const exists = current.some((item) => item.id === data.session.id)
+          if (!exists) return [data.session, ...current]
+          return current.map((item) => (item.id === data.session.id ? { ...item, ...data.session } : item))
+        })
+      }
     } catch (err) {
       setMessages((current) => current.filter((message) => message.id !== tempUserMessage.id && message.id !== tempAssistantMessage.id))
       if (err?.response?.status === 401) return
@@ -105,14 +140,79 @@ export default function Chat() {
     }
   }
 
+  async function handleCreateNewChat() {
+    if (!token || loading) return
+    try {
+      const data = await (onCreateSession ? onCreateSession() : createChatSession(token))
+      const newSession = data.session || data
+      setSessions((current) => [newSession, ...current])
+      setCurrentSession(newSession)
+      setMessages([])
+      onSessionChange?.(newSession.id)
+      toast.success('Nuevo chat creado')
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'No se pudo crear un nuevo chat'
+      toast.error(msg)
+    }
+  }
+
+  async function handleSelectSession(nextSessionId) {
+    if (!nextSessionId || nextSessionId === sessionId) return
+    onSessionChange?.(nextSessionId)
+    setLoadingThread(true)
+    try {
+      const thread = await getChatThread(token, nextSessionId)
+      setCurrentSession(thread.session || null)
+      setMessages(thread.messages || [])
+      if (onOpenSession) onOpenSession(nextSessionId)
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'No se pudo abrir la sesión'
+      toast.error(msg)
+    } finally {
+      setLoadingThread(false)
+    }
+  }
+
   return (
     <div className="h-[calc(100vh-5.5rem-env(safe-area-inset-bottom,0px))] min-h-[540px] flex flex-col bg-gradient-to-b from-purple-50 via-white to-indigo-50 rounded-none">
-      <div className="flex items-center gap-3 px-4 sm:px-6 py-4 border-b border-purple-200 bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-700 text-white shadow-sm">
-        <div className="w-11 h-11 rounded-full bg-white/15 text-white flex items-center justify-center shadow-sm">
-          <Sparkles className="w-5 h-5" />
+      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-purple-200 bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-700 text-white shadow-sm">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-11 h-11 rounded-full bg-white/15 text-white flex items-center justify-center shadow-sm flex-shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-lg font-semibold text-white truncate">{currentSession?.title || 'Chat con Ágora'}</h2>
+            <p className="text-xs text-purple-100 truncate">{currentSession?.preview || (user?.name ? `Hola ${user.name}` : 'Conversación activa')}</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-lg font-semibold text-white">Chat con Ágora</h2>
+
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            type="button"
+            onClick={handleCreateNewChat}
+            className="rounded-full bg-white/15 px-3 py-2 text-sm font-semibold text-white hover:bg-white/25 transition"
+          >
+            Crear nuevo chat
+          </button>
+        </div>
+      </div>
+
+      <div className="border-b border-purple-100 bg-white/80 px-4 sm:px-6 py-3">
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Sesiones recientes</h3>
+          <span className="text-xs text-gray-400">{sessions.length} chat{sessions.length === 1 ? '' : 's'}</span>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {sessions.slice(0, 6).map((session) => (
+            <button
+              key={session.id}
+              type="button"
+              onClick={() => handleSelectSession(session.id)}
+              className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium border transition ${sessionId === session.id ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300 hover:text-indigo-700'}`}
+            >
+              {session.title === 'Nuevo chat' ? 'Chat nuevo' : session.title}
+            </button>
+          ))}
         </div>
       </div>
 

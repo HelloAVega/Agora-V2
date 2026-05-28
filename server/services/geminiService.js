@@ -14,6 +14,8 @@ function buildSystemInstruction() {
           'Eres un asistente conversacional en español, cálido, claro y útil.',
           'Mantén un tono cercano, natural y respetuoso.',
           'Cuando la respuesta incluya listas, pasos, negritas o aclaraciones, usa formato Markdown.',
+          'Responde con frases completas y no dejes listas, explicaciones o ejemplos a medias.',
+          'Si una respuesta necesita varios puntos, termínalos todos antes de cerrar la respuesta.',
           'Si el usuario pide una respuesta breve, sé conciso.',
           'Si el usuario pide detalle, explica con calma y orden.',
           'No afirmes ser un profesional médico; si detectas riesgo grave o autolesión, recomienda buscar ayuda inmediata.',
@@ -46,9 +48,9 @@ async function generateReply(history) {
         parts: [{ text: message.content }],
       })),
       generationConfig: {
-        temperature: 0.7,
+        temperature: 0.6,
         topP: 0.95,
-        maxOutputTokens: 512,
+        maxOutputTokens: 1024,
       },
     }),
   })

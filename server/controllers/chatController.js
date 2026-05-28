@@ -5,13 +5,59 @@ const { generateReply, DEFAULT_MODEL } = require('../services/geminiService')
 
 const HISTORY_LIMIT = 20
 
-async function getOrCreateSession(userId) {
-  const [session] = await ChatSession.findOrCreate({
+function cleanText(text) {
+  return String(text || '').replace(/\s+/g, ' ').trim()
+}
+
+function buildSessionTitleFromMessage(message) {
+  const text = cleanText(message)
+  if (!text) return 'Nuevo chat'
+
+  const normalized = text
+    .replace(/^[¿¡\s]+/, '')
+    .replace(/[¿?!.]+$/g, '')
+    .replace(/^(quiero hablar de|necesito ayuda con|ayuda con|hablar de|sobre)\s+/i, '')
+
+  const words = normalized.split(' ').filter(Boolean).slice(0, 6)
+  if (!words.length) return 'Nuevo chat'
+
+  const snippet = words.join(' ')
+  return `Chat sobre ${snippet.charAt(0).toUpperCase()}${snippet.slice(1)}`.slice(0, 48)
+}
+
+function buildPreviewFromMessage(message, role = 'assistant') {
+  const text = cleanText(message)
+  if (!text) return 'Sin mensajes todavía'
+  const prefix = role === 'user' ? 'Tú: ' : 'Ágora: '
+  return `${prefix}${text}`.slice(0, 88)
+}
+
+function serializeSession(session, preview = '') {
+  return {
+    id: session.id,
+    userId: session.userId,
+    title: session.title,
+    preview,
+    createdAt: session.createdAt,
+    updatedAt: session.updatedAt,
+    lastMessageAt: session.lastMessageAt,
+  }
+}
+
+async function getOrCreateSession(userId, sessionId = null) {
+  if (sessionId) {
+    const selected = await ChatSession.findOne({ where: { id: sessionId, userId } })
+    if (selected) return selected
+  }
+
+  const latest = await ChatSession.findOne({
     where: { userId },
-    defaults: { userId, title: 'Chat con Ágora' },
+    order: [['lastMessageAt', 'DESC'], ['updatedAt', 'DESC'], ['createdAt', 'DESC']],
   })
 
-  return session
+  if (latest) return latest
+
+  return ChatSession.create({ userId, title: 'Nuevo chat' })
 }
 
 function mapMessage(message) {
@@ -28,7 +74,7 @@ async function getThread(req, res) {
   if (!req.user) return res.status(401).json({ message: 'Unauthorized' })
 
   try {
-    const session = await getOrCreateSession(req.user.id)
+    const session = await getOrCreateSession(req.user.id, req.query.sessionId || null)
     const messages = await ChatMessage.findAll({
       where: { chatSessionId: session.id },
       order: [['createdAt', 'ASC']],
@@ -36,7 +82,7 @@ async function getThread(req, res) {
     })
 
     return res.json({
-      session: { id: session.id, title: session.title },
+      session: serializeSession(session),
       messages: messages.map(mapMessage),
     })
   } catch (err) {
@@ -45,16 +91,62 @@ async function getThread(req, res) {
   }
 }
 
+async function getSessions(req, res) {
+  if (!req.user) return res.status(401).json({ message: 'Unauthorized' })
+
+  try {
+    const sessions = await ChatSession.findAll({
+      where: { userId: req.user.id },
+      order: [['lastMessageAt', 'DESC'], ['updatedAt', 'DESC'], ['createdAt', 'DESC']],
+    })
+
+    const sessionsWithPreview = await Promise.all(sessions.map(async (session) => {
+      const lastMessage = await ChatMessage.findOne({
+        where: { chatSessionId: session.id },
+        order: [['createdAt', 'DESC']],
+      })
+
+        const preview = lastMessage
+          ? buildPreviewFromMessage(lastMessage.content, lastMessage.role)
+          : 'Sin mensajes todavía'
+
+      return serializeSession(session, preview)
+    }))
+
+    return res.json({ sessions: sessionsWithPreview })
+  } catch (err) {
+    console.error('GetSessions error', err)
+    return res.status(500).json({ message: 'Server error' })
+  }
+}
+
+async function createSession(req, res) {
+  if (!req.user) return res.status(401).json({ message: 'Unauthorized' })
+
+  try {
+    const session = await ChatSession.create({
+      userId: req.user.id,
+      title: 'Nuevo chat',
+      lastMessageAt: null,
+    })
+
+    return res.status(201).json({ session: serializeSession(session) })
+  } catch (err) {
+    console.error('CreateSession error', err)
+    return res.status(500).json({ message: 'Server error' })
+  }
+}
+
 async function sendMessage(req, res) {
   if (!req.user) return res.status(401).json({ message: 'Unauthorized' })
 
-  const { message } = req.body
+  const { message, sessionId } = req.body
   if (!message || !message.trim()) {
     return res.status(400).json({ message: 'Message required' })
   }
 
   try {
-    const session = await getOrCreateSession(req.user.id)
+    const session = await getOrCreateSession(req.user.id, sessionId || null)
 
     const recentMessages = await ChatMessage.findAll({
       where: { chatSessionId: session.id },
@@ -70,6 +162,10 @@ async function sendMessage(req, res) {
     const reply = await generateReply(history)
 
     const result = await sequelize.transaction(async (transaction) => {
+      const nextTitle = session.title === 'Nuevo chat'
+        ? buildSessionTitleFromMessage(message)
+        : session.title
+
       const userMessage = await ChatMessage.create({
         chatSessionId: session.id,
         role: 'user',
@@ -83,11 +179,16 @@ async function sendMessage(req, res) {
         model: reply.model || DEFAULT_MODEL,
       }, { transaction })
 
-      return { userMessage, assistantMessage }
+      await session.update({
+        title: nextTitle,
+        lastMessageAt: new Date(),
+      }, { transaction })
+
+      return { userMessage, assistantMessage, session }
     })
 
     return res.status(201).json({
-      session: { id: session.id, title: session.title },
+      session: serializeSession(result.session),
       userMessage: mapMessage(result.userMessage),
       assistantMessage: mapMessage(result.assistantMessage),
     })
@@ -97,4 +198,4 @@ async function sendMessage(req, res) {
   }
 }
 
-module.exports = { getThread, sendMessage }
+module.exports = { getThread, getSessions, createSession, sendMessage }

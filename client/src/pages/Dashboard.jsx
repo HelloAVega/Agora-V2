@@ -1,40 +1,97 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ChevronRight, Plus, History } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { useAuthStore } from '../stores/authStore'
+import { createChatSession, getChatSessions } from '../services/chatService'
 
-export default function Dashboard({ onStartChat }) {
-  const [stats] = useState({
-    totalSessions: 12,
-    thisMonth: 5,
-    lastChatDate: '2024-05-24',
-    averageMood: 'Mejorando'
-  })
+export default function Dashboard({ onOpenSession, onCreateSession }) {
+  const token = useAuthStore((s) => s.token)
+  const [sessions, setSessions] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [creating, setCreating] = useState(false)
 
-  const recentSessions = [
-    {
-      id: 1,
-      date: '2024-05-24',
-      time: '14:30',
-      duration: '23 min',
-      mood: 'Ansioso',
-      summary: 'Conversación sobre estrés laboral'
-    },
-    {
-      id: 2,
-      date: '2024-05-22',
-      time: '10:15',
-      duration: '18 min',
-      mood: 'Triste',
-      summary: 'Apoyo emocional general'
-    },
-    {
-      id: 3,
-      date: '2024-05-20',
-      time: '19:45',
-      duration: '31 min',
-      mood: 'Neutral',
-      summary: 'Técnicas de relajación'
+  const formatDateTime = (value) => {
+    if (!value) return 'Sin chats todavía'
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return 'Sin chats todavía'
+    return new Intl.DateTimeFormat('es-ES', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date)
+  }
+
+  const getRelativeTime = (value) => {
+    if (!value) return 'Sin chats todavía'
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return 'Sin chats todavía'
+
+    const diffMs = Date.now() - date.getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+    if (diffDays <= 0) return 'Hoy'
+    if (diffDays === 1) return 'Hace 1 día'
+    if (diffDays < 30) return `Hace ${diffDays} días`
+
+    const diffMonths = Math.floor(diffDays / 30)
+    if (diffMonths === 1) return 'Hace 1 mes'
+    return `Hace ${diffMonths} meses`
+  }
+
+  const stats = useMemo(() => ({
+    totalSessions: sessions.length,
+    thisMonth: sessions.filter((session) => {
+      const createdAt = session.createdAt ? new Date(session.createdAt) : null
+      if (!createdAt) return false
+      const now = new Date()
+      return createdAt.getMonth() === now.getMonth() && createdAt.getFullYear() === now.getFullYear()
+    }).length,
+    lastChatDate: formatDateTime(sessions[0]?.lastMessageAt || sessions[0]?.updatedAt || sessions[0]?.createdAt),
+    lastChatRelative: getRelativeTime(sessions[0]?.lastMessageAt || sessions[0]?.updatedAt || sessions[0]?.createdAt),
+    averageMood: sessions.length ? 'Activo' : 'Sin actividad'
+  }), [sessions])
+
+  useEffect(() => {
+    let mounted = true
+
+    async function loadSessions() {
+      if (!token) return
+      setLoading(true)
+      try {
+        const data = await getChatSessions(token)
+        if (!mounted) return
+        setSessions(data.sessions || [])
+      } catch (err) {
+        const msg = err?.response?.data?.message || 'No se pudieron cargar las sesiones'
+        toast.error(msg)
+      } finally {
+        if (mounted) setLoading(false)
+      }
     }
-  ]
+
+    loadSessions()
+    return () => {
+      mounted = false
+    }
+  }, [token])
+
+  async function handleCreateSession() {
+    if (!token || creating) return
+    setCreating(true)
+    try {
+      const data = onCreateSession ? await onCreateSession() : await createChatSession(token)
+      const session = data.session || data
+      setSessions((current) => [session, ...current])
+      onOpenSession?.(session.id)
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'No se pudo crear un nuevo chat'
+      toast.error(msg)
+    } finally {
+      setCreating(false)
+    }
+  }
 
   const getMoodColor = (mood) => {
     const colors = {
@@ -78,7 +135,7 @@ export default function Dashboard({ onStartChat }) {
               <span className="text-2xl">📅</span>
             </div>
             <p className="text-lg font-bold text-gray-900">{stats.lastChatDate}</p>
-            <p className="text-xs text-gray-500 mt-2">Hace 2 días</p>
+            <p className="text-xs text-gray-500 mt-2">{stats.lastChatRelative}</p>
           </div>
 
           <div className="bg-white rounded-lg p-6 shadow-sm border border-indigo-100">
@@ -93,9 +150,9 @@ export default function Dashboard({ onStartChat }) {
 
         {/* Main Action */}
         <div className="mb-12">
-          <button onClick={onStartChat} className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-6 px-8 rounded-xl hover:shadow-lg transition transform hover:scale-105 flex items-center justify-center space-x-3 font-semibold text-lg">
+          <button onClick={handleCreateSession} className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 text-white py-6 px-8 rounded-xl hover:shadow-lg transition transform hover:scale-105 flex items-center justify-center space-x-3 font-semibold text-lg disabled:opacity-60" disabled={creating}>
             <Plus className="w-6 h-6" />
-            <span>Iniciar Nueva Sesión de Chat</span>
+            <span>{creating ? 'Creando chat...' : 'Crear nuevo chat'}</span>
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
@@ -107,30 +164,37 @@ export default function Dashboard({ onStartChat }) {
               <History className="w-6 h-6 text-indigo-600" />
               <span>Sesiones Recientes</span>
             </h3>
-            <button className="text-indigo-600 hover:text-indigo-700 font-semibold flex items-center space-x-1">
-              <span>Ver Todo</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
           </div>
 
           <div className="space-y-4">
-            {recentSessions.map((session) => (
+            {loading && (
+              <div className="rounded-lg bg-white p-6 shadow-sm border border-indigo-100 text-gray-500">Cargando sesiones...</div>
+            )}
+
+            {!loading && sessions.length === 0 && (
+              <div className="rounded-lg bg-white p-6 shadow-sm border border-indigo-100 text-gray-500">
+                Todavía no hay sesiones. Crea el primer chat para empezar.
+              </div>
+            )}
+
+            {!loading && sessions.slice(0, 3).map((session) => (
               <div
                 key={session.id}
                 className="bg-white rounded-lg p-6 shadow-sm border border-indigo-100 hover:shadow-md hover:border-indigo-200 transition cursor-pointer"
+                onClick={() => onOpenSession?.(session.id)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
                       <span className="text-sm font-semibold text-gray-900">
-                        {session.date} • {session.time}
+                        {session.createdAt ? new Date(session.createdAt).toLocaleDateString() : 'Sin fecha'} • {session.createdAt ? new Date(session.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                       </span>
-                      <span className={`text-xs px-3 py-1 rounded-full font-medium ${getMoodColor(session.mood)}`}>
-                        {session.mood}
+                      <span className={`text-xs px-3 py-1 rounded-full font-medium ${getMoodColor(session.title === 'Nuevo chat' ? 'Neutral' : 'Mejorando')}`}>
+                        {session.title === 'Nuevo chat' ? 'Nuevo' : 'Activo'}
                       </span>
                     </div>
-                    <p className="text-gray-700 mb-2">{session.summary}</p>
-                    <p className="text-sm text-gray-500">Duración: {session.duration}</p>
+                    <p className="text-gray-700 mb-2">{session.preview || session.title}</p>
+                    <p className="text-sm text-gray-500">{session.title}</p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0 mt-1" />
                 </div>
@@ -144,7 +208,7 @@ export default function Dashboard({ onStartChat }) {
           <h4 className="font-semibold text-blue-900 mb-2">💡 Recuerda</h4>
           <p className="text-blue-800">
             Este espacio es completamente anónimo y confidencial. Todo lo que compartas está protegido 
-            y supervisado por psicólogos profesionales. Si necesitas ayuda inmediata, siempre puedes 
+            y supervisado. Si necesitas ayuda inmediata, siempre puedes 
             comunicarte con un profesional de salud mental.
           </p>
         </div>

@@ -8,17 +8,44 @@ import Register from './pages/Register'
 import Settings from './pages/Settings'
 import { useAuthStore } from './stores/authStore'
 import { me as meRequest } from './services/authService'
+import { createChatSession } from './services/chatService'
 import { Toaster } from 'react-hot-toast'
 
 // Page titles removed to keep header minimal
 
 function App() {
   const [activeTab, setActiveTab] = useState('home')
+  const [selectedChatSessionId, setSelectedChatSessionId] = useState(() => {
+    try {
+      return localStorage.getItem('agora_active_chat_session_id') || null
+    } catch (e) {
+      return null
+    }
+  })
   const token = useAuthStore((s) => s.token)
   const [authView, setAuthView] = useState('login')
   const user = useAuthStore((s) => s.user)
   const setAuth = useAuthStore((s) => s.setAuth)
   const logout = useAuthStore((s) => s.logout)
+
+  useEffect(() => {
+    if (!token) {
+      setSelectedChatSessionId(null)
+      try {
+        localStorage.removeItem('agora_active_chat_session_id')
+      } catch (e) {}
+    }
+  }, [token])
+
+  useEffect(() => {
+    try {
+      if (selectedChatSessionId) {
+        localStorage.setItem('agora_active_chat_session_id', String(selectedChatSessionId))
+      } else {
+        localStorage.removeItem('agora_active_chat_session_id')
+      }
+    } catch (e) {}
+  }, [selectedChatSessionId])
 
   useEffect(() => {
     let mounted = true
@@ -39,6 +66,19 @@ function App() {
       mounted = false
     }
   }, [token, logout, setAuth, user])
+
+  const openSession = (sessionId) => {
+    setSelectedChatSessionId(sessionId)
+    setActiveTab('chat')
+  }
+
+  const createSessionAndOpen = async () => {
+    const data = await createChatSession(token)
+    const session = data.session || data
+    setSelectedChatSessionId(session.id)
+    setActiveTab('chat')
+    return data
+  }
 
   // If not authenticated, render auth screens in their own full-screen layout
   if (!token) {
@@ -62,8 +102,20 @@ function App() {
       {/* Main Content — padding inferior para la barra fija */}
       <div className="flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))]">
         <main className={activeTab === 'chat' ? 'h-full' : 'p-4 sm:p-6'}>
-          {activeTab === 'home' && <Dashboard onStartChat={() => setActiveTab('chat')} />}
-          {activeTab === 'chat' && <Chat />}
+          {activeTab === 'home' && (
+            <Dashboard
+              onOpenSession={openSession}
+              onCreateSession={createSessionAndOpen}
+            />
+          )}
+          {activeTab === 'chat' && (
+            <Chat
+              sessionId={selectedChatSessionId}
+              onSessionChange={setSelectedChatSessionId}
+              onCreateSession={createSessionAndOpen}
+              onOpenSession={openSession}
+            />
+          )}
           {activeTab === 'analytics' && (
             <div className="bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-gray-200">
               <p className="text-gray-600">Analytics dashboard - Coming soon</p>

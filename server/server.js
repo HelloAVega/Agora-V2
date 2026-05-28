@@ -68,7 +68,7 @@ const User = require('./models/user');
 const ChatSession = require('./models/chatSession');
 const ChatMessage = require('./models/chatMessage');
 
-User.hasOne(ChatSession, { foreignKey: 'userId', as: 'chatSession', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+User.hasMany(ChatSession, { foreignKey: 'userId', as: 'chatSessions', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 ChatSession.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 ChatSession.hasMany(ChatMessage, { foreignKey: 'chatSessionId', as: 'messages', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 ChatMessage.belongsTo(ChatSession, { foreignKey: 'chatSessionId', as: 'session' });
@@ -78,6 +78,20 @@ ChatMessage.belongsTo(ChatSession, { foreignKey: 'chatSessionId', as: 'session' 
     await sequelize.authenticate();
     // Use alter to update DB schema with new fields (adds `avatar` if missing)
     await sequelize.sync({ alter: true });
+    const queryInterface = sequelize.getQueryInterface();
+    try {
+      await sequelize.query('ALTER TABLE "chat_sessions" DROP CONSTRAINT IF EXISTS "chat_sessions_userId_key";')
+      await sequelize.query('DROP INDEX IF EXISTS "chat_sessions_userId_key";')
+      const indexes = await queryInterface.showIndex('chat_sessions');
+      for (const index of indexes) {
+        const hasUserIdField = Array.isArray(index.fields) && index.fields.some((field) => field.attribute === 'userId');
+        if (index.unique && hasUserIdField) {
+          await queryInterface.removeIndex('chat_sessions', index.name);
+        }
+      }
+    } catch (indexError) {
+      console.warn('Could not normalize chat session indexes:', indexError.message || indexError);
+    }
     console.log('✅ Database connected and synced');
   } catch (err) {
     console.error('Database connection failed:', err.message || err);
