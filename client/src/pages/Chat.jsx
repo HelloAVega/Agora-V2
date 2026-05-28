@@ -6,7 +6,7 @@ import toast from 'react-hot-toast'
 import { useAuthStore } from '../stores/authStore'
 import { createChatSession, getChatSessions, getChatThread, sendChatMessage } from '../services/chatService'
 
-export default function Chat({ sessionId, onSessionChange, onCreateSession, onOpenSession }) {
+export default function Chat({ sessionId, onSessionChange, onCreateSession, onOpenSession, onKeyboardChange }) {
   const token = useAuthStore((s) => s.token)
   const user = useAuthStore((s) => s.user)
   const [messages, setMessages] = useState([])
@@ -15,6 +15,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [loadingThread, setLoadingThread] = useState(true)
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
   const bottomRef = useRef(null)
   const textareaRef = useRef(null)
 
@@ -100,6 +101,30 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
   useEffect(() => {
     resizeTextarea()
   }, [input])
+
+  useEffect(() => {
+    const viewport = window.visualViewport
+    if (!viewport) return undefined
+
+    const threshold = 140
+    const syncKeyboardState = () => {
+      const visualHeight = viewport.height
+      const layoutHeight = window.innerHeight
+      const open = layoutHeight - visualHeight > threshold
+      setKeyboardOpen(open)
+      onKeyboardChange?.(open)
+    }
+
+    syncKeyboardState()
+    viewport.addEventListener('resize', syncKeyboardState)
+    viewport.addEventListener('scroll', syncKeyboardState)
+
+    return () => {
+      viewport.removeEventListener('resize', syncKeyboardState)
+      viewport.removeEventListener('scroll', syncKeyboardState)
+      onKeyboardChange?.(false)
+    }
+  }, [onKeyboardChange])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -228,7 +253,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
       </div>
 
       <div className="flex-1 min-h-0 flex flex-col bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.10),_transparent_38%)]">
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] space-y-4 scroll-pb-24">
+        <div className={`flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 ${keyboardOpen ? 'pb-2 scroll-pb-4' : 'pb-[calc(6rem+env(safe-area-inset-bottom,0px))] scroll-pb-24'} space-y-4`}>
           {loadingThread && (
             <div className="text-sm text-gray-500 flex items-center gap-2">
               <MessagesSquare className="w-4 h-4" />
@@ -276,8 +301,12 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
           <div ref={bottomRef} />
         </div>
 
-        <form onSubmit={handleSubmit} className="border-t border-gray-200 bg-white/95 backdrop-blur-sm p-3 sm:p-4">
-          <div className="flex items-end gap-3">
+        <form
+          onSubmit={handleSubmit}
+          className={`border-t border-gray-200 bg-white/95 backdrop-blur-sm transition-[padding,transform,box-shadow,border-radius] duration-300 ease-out ${keyboardOpen ? 'px-3 pt-2 pb-[calc(0.25rem+env(safe-area-inset-bottom,0px))] shadow-[0_-14px_35px_rgba(0,0,0,0.10)] rounded-t-3xl border-x border-gray-100' : 'p-3 sm:p-4'}`}
+          style={{ transform: keyboardOpen ? 'translateY(-4px)' : 'translateY(0)' }}
+        >
+          <div className="flex items-end gap-3 transition-transform duration-300 ease-out" style={{ transform: keyboardOpen ? 'translateY(-2px)' : 'translateY(0)' }}>
             <textarea
               ref={textareaRef}
               value={input}

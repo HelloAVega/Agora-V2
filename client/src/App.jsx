@@ -15,6 +15,7 @@ import { Toaster } from 'react-hot-toast'
 
 function App() {
   const [activeTab, setActiveTab] = useState('home')
+  const [isChatKeyboardOpen, setIsChatKeyboardOpen] = useState(false)
   const [selectedChatSessionId, setSelectedChatSessionId] = useState(() => {
     try {
       return localStorage.getItem('agora_active_chat_session_id') || null
@@ -100,7 +101,14 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Main Content — padding inferior para la barra fija */}
-      <div className="flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))]">
+      <div
+        className="flex-1"
+        style={{
+          paddingBottom: activeTab === 'chat' && isChatKeyboardOpen
+            ? '0px'
+            : 'calc(4.5rem + env(safe-area-inset-bottom, 0px))',
+        }}
+      >
         <main className={activeTab === 'chat' ? 'h-full' : 'p-4 sm:p-6'}>
           {activeTab === 'home' && (
             <Dashboard
@@ -114,6 +122,7 @@ function App() {
               onSessionChange={setSelectedChatSessionId}
               onCreateSession={createSessionAndOpen}
               onOpenSession={openSession}
+              onKeyboardChange={setIsChatKeyboardOpen}
             />
           )}
           {activeTab === 'analytics' && (
@@ -125,7 +134,11 @@ function App() {
         </main>
       </div>
 
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+      <BottomNav
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        className={activeTab === 'chat' && isChatKeyboardOpen ? 'translate-y-full opacity-0 pointer-events-none' : ''}
+      />
       <Toaster position="top-right" />
     </div>
   )
