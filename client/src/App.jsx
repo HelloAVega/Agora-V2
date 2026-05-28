@@ -42,10 +42,6 @@ function App() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="w-full max-w-md p-6">
           <div className="bg-white rounded-xl p-6 sm:p-8 shadow-md border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-xl font-bold">Iniciar sesión</h1>
-            </div>
-
             {authView === 'login' && <Login onSwitch={setAuthView} />}
             {authView === 'register' && <Register onSwitch={setAuthView} />}
           </div>
