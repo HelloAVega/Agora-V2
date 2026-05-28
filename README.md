@@ -4,27 +4,66 @@ Aplicación web completa mobile-first para apoyo emocional con IA conversacional
 
 ## 🚀 Quick Start
 
+### Desarrollo con Docker
+
 ```bash
-# 1. Crear estructura del proyecto
-node setup-full.js
+docker-compose up
+```
 
-# 2. Instalar dependencias
+Accede a:
+- **Frontend**: http://localhost:5173
+- **Backend**: http://localhost:5000
+- **Base de datos**: PostgreSQL del contenedor `postgres`
+
+### Desarrollo local sin Docker
+
+Instala dependencias desde la raíz y los subproyectos:
+
+```bash
 npm install
-cd server && npm install
-cd ../client && npm install
-cd ..
+cd server && npm install && cd ..
+cd client && npm install && cd ..
+```
 
-# 3. Configurar variables de ambiente
-cp server/.env.example server/.env
-cp client/.env.example client/.env.local
+Configura los entornos:
 
-# 4. Iniciar en desarrollo
+**server/.env**
+```bash
+NODE_ENV=development
+PORT=3001
+DATABASE_URL=postgresql://user:pass@localhost:5432/agora
+JWT_SECRET=tu_secreto_jwt_super_seguro_aqui
+FRONTEND_URL=http://localhost:5173
+OPENAI_API_KEY=sk-...
+```
+
+**client/.env.local**
+```bash
+# Opcional para desarrollo local o Docker.
+VITE_API_URL=http://localhost:3001
+```
+
+Luego inicia:
+
+```bash
 npm run dev
 ```
 
 Accede a:
-- **Frontend**: http://localhost:3000
+- **Frontend**: http://localhost:5173
 - **Backend**: http://localhost:3001
+
+### Desarrollo por terminales separadas
+
+```bash
+# Terminal 1
+cd server
+npm run dev
+
+# Terminal 2
+cd client
+npm run dev
+```
 
 ## 📋 Requisitos
 
@@ -104,6 +143,8 @@ JWT_SECRET=tu_secreto
 OPENAI_API_KEY=tu_key
 ```
 
+En Heroku no definas `VITE_API_URL`; el frontend usará el mismo origen HTTPS.
+
 ## 📝 Variables de Ambiente
 
 **server/.env:**
@@ -112,13 +153,13 @@ NODE_ENV=development
 PORT=3001
 DATABASE_URL=postgresql://user:pass@localhost:5432/agora
 JWT_SECRET=tu_secreto_jwt_super_seguro_aqui
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=http://localhost:5173
 OPENAI_API_KEY=sk-...
 ```
 
 **client/.env.local:**
 ```
-VITE_API_URL=http://localhost:3001/api
+VITE_API_URL=http://localhost:3001
 ```
 
 ## ⚙️ Scripts Disponibles
@@ -167,16 +208,16 @@ npm run preview          # Previsualizar build
 
 | Problema | Solución |
 |----------|----------|
-| Puerto 3000/3001 en uso | Cambia PORT en .env |
+| Puerto 5173/3001/5000 en uso | Cambia `PORT` o revisa `docker-compose.yml` |
 | Base de datos no conecta | Verifica DATABASE_URL |
 | npm install falla | Borra node_modules y npm cache clean |
 | Vite no compila | npm install @vitejs/plugin-react |
 
 ## 📚 Documentación
 
-- Ver `START_HERE.md` para setup paso a paso
-- Ver especificación funcional en documentos incluidos
-- Arquitectura en `5.2` de especificación
+- Revisa `docker-compose.yml` para el flujo de desarrollo con Docker
+- Revisa `server/config/database.js` para ver la lógica de base de datos
+- Revisa `client/src/services/authService.js` para las llamadas API
 
 ## 🤝 Contribuir
 
@@ -189,7 +230,8 @@ npm run preview          # Previsualizar build
 
 MIT
 
+
 ---
 
-**¿Primer contacto?** Comienza por `START_HERE.md` →
+**¿Primer contacto?** Comienza por este `README.md` y luego revisa el código fuente en `server/` y `client/`.
 
