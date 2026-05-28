@@ -7,10 +7,10 @@ const menuItems = [
   { id: 'settings', label: 'Ajustes', icon: Settings },
 ]
 
-export default function BottomNav({ activeTab, setActiveTab, className = '' }) {
+export default function BottomNav({ activeTab, setActiveTab }) {
   return (
     <nav
-      className={`fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] transform-gpu transition-[transform,opacity] duration-300 ease-out ${className}`}
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       aria-label="Navegación principal"
     >
