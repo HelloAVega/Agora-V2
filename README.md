@@ -144,6 +144,8 @@ GEMINI_API_KEY=tu_key
 GEMINI_MODEL=gemini-flash-latest
 ```
 
+Si Heroku te sigue devolviendo `GEMINI_API_KEY no está configurada`, revisa en Settings → Config Vars que la variable exista exactamente con ese nombre.
+
 En Heroku no definas `VITE_API_URL`; el frontend usará el mismo origen HTTPS.
 
 ## 📝 Variables de Ambiente
@@ -158,6 +160,8 @@ FRONTEND_URL=http://localhost:5173
 GEMINI_API_KEY=sk-...
 GEMINI_MODEL=gemini-flash-latest
 ```
+
+Ese archivo es la fuente local/Docker para Gemini. En Heroku la misma configuración va en `Settings → Config Vars` porque allí no se usa archivo `.env`.
 
 **client/.env.local:**
 ```

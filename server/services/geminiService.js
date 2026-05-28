@@ -1,6 +1,10 @@
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta'
 const DEFAULT_MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest'
 
+function getGeminiApiKey() {
+  return process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GOOGLE_GEMINI_API_KEY || ''
+}
+
 function buildSystemInstruction() {
   return {
     parts: [
@@ -12,9 +16,9 @@ function buildSystemInstruction() {
 }
 
 async function generateReply(history) {
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = getGeminiApiKey()
   if (!apiKey) {
-    const error = new Error('GEMINI_API_KEY no está configurada')
+    const error = new Error('Configura GEMINI_API_KEY en Heroku Config Vars o en el entorno del servidor')
     error.statusCode = 500
     throw error
   }
