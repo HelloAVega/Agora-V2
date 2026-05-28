@@ -26,6 +26,16 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Simple logger for auth API requests to help debug uploads
+app.use((req, res, next) => {
+  try {
+    if (req.path && req.path.startsWith('/api/auth')) {
+      console.log('[auth-logger]', req.method, req.path, 'headers:', { authorization: !!req.headers.authorization })
+    }
+  } catch (e) {}
+  next()
+})
+
 // Auth routes (register / login)
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Sun, Moon } from 'lucide-react'
 import './App.css'
 import BottomNav from './components/BottomNav'
 import Dashboard from './pages/Dashboard'
@@ -14,21 +13,6 @@ import { Toaster } from 'react-hot-toast'
 
 function App() {
   const [activeTab, setActiveTab] = useState('home')
-  const [theme, setTheme] = useState(() => {
-    try {
-      return localStorage.getItem('agora_theme') || 'light'
-    } catch (e) {
-      return 'light'
-    }
-  })
-function ThemeApplier({ theme }) {
-  useEffect(() => {
-    try {
-      document.documentElement.classList.toggle('dark', theme === 'dark')
-    } catch (e) {}
-  }, [theme])
-  return null
-}
   const token = useAuthStore((s) => s.token)
   const [authView, setAuthView] = useState('login')
   const user = useAuthStore((s) => s.user)
@@ -77,44 +61,6 @@ function ThemeApplier({ theme }) {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Main Content — padding inferior para la barra fija */}
       <div className="flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))]">
-        <header className="px-4 sm:px-6 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setActiveTab('settings')}
-              className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-sm font-medium text-gray-700 dark:text-gray-100"
-              aria-label="Abrir perfil"
-            >
-              {user?.avatar ? (
-                <img src={user.avatar} alt={user.name || 'Perfil'} className="w-full h-full object-cover" />
-              ) : (
-                <span>{(user?.name || user?.email || 'U').charAt(0).toUpperCase()}</span>
-              )}
-            </button>
-            <div className="hidden sm:block">
-              <div className="text-sm font-medium text-gray-900">{user?.name || user?.email}</div>
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="button"
-              onClick={() => {
-                const next = theme === 'light' ? 'dark' : 'light'
-                setTheme(next)
-                try { localStorage.setItem('agora_theme', next) } catch (e) {}
-              }}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-100"
-              aria-label="Alternar tema"
-            >
-              {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-            </button>
-          </div>
-        </header>
-
-        {/* Apply theme to <html> */}
-        <ThemeApplier theme={theme} />
-
         <main className="p-4 sm:p-6">
           {activeTab === 'home' && <Dashboard />}
           {activeTab === 'chat' && null}

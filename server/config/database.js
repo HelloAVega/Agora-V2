@@ -1,6 +1,9 @@
+const fs = require('fs');
+const path = require('path');
 const { Sequelize } = require('sequelize');
 
 const connectionString = process.env.DATABASE_URL || '';
+const sqliteStorage = process.env.SQLITE_STORAGE || path.join(__dirname, '..', 'data', 'agora.sqlite');
 
 let sequelize;
 if (connectionString) {
@@ -9,8 +12,15 @@ if (connectionString) {
     logging: false,
   });
 } else {
-  // Fallback to in-memory sqlite for local dev when DATABASE_URL not provided
-  sequelize = new Sequelize('sqlite::memory:', { logging: false });
+  // Fallback to file-based sqlite for local dev when DATABASE_URL is not provided
+  // This keeps data between restarts and works outside Docker/Heroku.
+  const dataDir = path.dirname(sqliteStorage);
+  fs.mkdirSync(dataDir, { recursive: true });
+  sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: sqliteStorage,
+    logging: false,
+  });
 }
 
 module.exports = sequelize;

@@ -30,6 +30,13 @@ export default function Settings() {
     return { score, label: labels[Math.min(score, labels.length - 1)] }
   }
 
+  const getAvatarSrc = (avatar) => {
+    if (!avatar) return null
+    if (/^https?:\/\//i.test(avatar)) return avatar
+    const baseUrl = API.defaults?.baseURL || ''
+    return `${baseUrl}${avatar}`
+  }
+
   async function handleUpdateProfile(e) {
     e.preventDefault()
     setStatusMsg(null)
@@ -126,16 +133,16 @@ export default function Settings() {
       <h2 className="text-2xl font-bold mb-4">Ajustes</h2>
 
       <div className="mb-6 flex items-center gap-4">
-        <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+        <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 ring-2 ring-indigo-100 shadow-sm flex items-center justify-center flex-shrink-0">
           {user?.avatar ? (
-            <img src={user.avatar} alt={user.name || 'Avatar'} className="w-full h-full object-cover" />
+            <img src={getAvatarSrc(user.avatar)} alt={user.name || 'Avatar'} className="w-full h-full object-cover object-center" />
           ) : (
             <span className="text-xl text-gray-700">{(user?.name || user?.email || 'U').charAt(0).toUpperCase()}</span>
           )}
         </div>
         <div>
           <h3 className="text-sm font-medium text-gray-600">Cuenta</h3>
-          <p className="text-gray-800 mt-2">{user ? (user.name || user.email) : 'No autenticado'}</p>
+          <p className="text-gray-800 mt-2 font-semibold">{user ? (user.name || user.email) : 'No autenticado'}</p>
           <p className="text-sm text-gray-500">{user ? user.email : ''}</p>
           <div className="mt-2">
             <label className="inline-flex items-center gap-2 cursor-pointer">
