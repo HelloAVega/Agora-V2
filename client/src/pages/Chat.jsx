@@ -185,7 +185,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
   }
 
   return (
-    <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] min-h-[540px] flex flex-col bg-gradient-to-b from-purple-50 via-white to-indigo-50 rounded-none overflow-hidden">
+    <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] min-h-0 flex flex-col bg-gradient-to-b from-purple-50 via-white to-indigo-50 rounded-none overflow-hidden">
       <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-purple-200 bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-700 text-white shadow-sm">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-full bg-white/15 text-white flex items-center justify-center shadow-sm flex-shrink-0">
@@ -227,93 +227,83 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 p-3 sm:p-4">
-        <div className="h-full min-h-0 flex flex-col overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-[0_10px_35px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-gray-100 bg-white/85 backdrop-blur-sm">
-            <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Mensajes</h3>
-              <p className="text-xs text-gray-400">{currentSession?.title || 'Chat activo'}</p>
+      <div className="flex-1 min-h-0 px-3 sm:px-4 pt-3 sm:pt-4 pb-3 sm:pb-4 flex flex-col gap-3">
+        <div className="flex-1 min-h-0 overflow-y-auto rounded-3xl border border-white/70 bg-white/90 px-4 sm:px-6 py-4 sm:py-5 space-y-4 shadow-[0_10px_35px_rgba(0,0,0,0.06)] bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.08),_transparent_38%)]">
+          {loadingThread && (
+            <div className="text-sm text-gray-500 flex items-center gap-2">
+              <MessagesSquare className="w-4 h-4" />
+              Cargando conversación...
             </div>
-            <span className="text-xs text-gray-400">{messages.length} mensaje{messages.length === 1 ? '' : 's'}</span>
-          </div>
+          )}
 
-          <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 space-y-4 bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.08),_transparent_38%)]">
-            {loadingThread && (
-              <div className="text-sm text-gray-500 flex items-center gap-2">
-                <MessagesSquare className="w-4 h-4" />
-                Cargando conversación...
-              </div>
-            )}
+          {!loadingThread && messages.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-indigo-200 bg-white p-5 text-gray-700 shadow-sm">
+              <p className="font-semibold text-indigo-700 mb-1">Hola {user?.name || 'de nuevo'}</p>
+              <p>Escribe tu primer mensaje y la conversación quedará guardada aquí para la próxima vez.</p>
+            </div>
+          )}
 
-            {!loadingThread && messages.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-indigo-200 bg-white p-5 text-gray-700 shadow-sm">
-                <p className="font-semibold text-indigo-700 mb-1">Hola {user?.name || 'de nuevo'}</p>
-                <p>Escribe tu primer mensaje y la conversación quedará guardada aquí para la próxima vez.</p>
-              </div>
-            )}
-
-            {messages.map((message) => {
-              const isUser = message.role === 'user'
-              const isTyping = message.typing
-              return (
-                <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-                  {isTyping ? (
-                    <div className="rounded-2xl rounded-bl-md border border-gray-200 bg-white px-4 py-3 shadow-sm">
-                      <div className="flex items-center gap-1">
-                        <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.2s]" />
-                        <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.1s]" />
-                        <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" />
-                        <span className="ml-2 text-xs font-medium text-gray-500">Ágora está escribiendo...</span>
+          {messages.map((message) => {
+            const isUser = message.role === 'user'
+            const isTyping = message.typing
+            return (
+              <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+                {isTyping ? (
+                  <div className="rounded-2xl rounded-bl-md border border-gray-200 bg-white px-4 py-3 shadow-sm">
+                    <div className="flex items-center gap-1">
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.2s]" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.1s]" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" />
+                      <span className="ml-2 text-xs font-medium text-gray-500">Ágora está escribiendo...</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`max-w-[88%] sm:max-w-[72%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${isUser ? 'bg-indigo-600 text-white rounded-br-md' : 'bg-white text-gray-800 border border-gray-200 rounded-bl-md'}`}>
+                    {isUser ? (
+                      <p className="whitespace-pre-wrap">{message.content}</p>
+                    ) : (
+                      <div className="prose prose-sm max-w-none prose-p:my-0 prose-headings:my-0 prose-ul:my-0 prose-ol:my-0 prose-li:my-0 prose-strong:text-gray-900 prose-p:text-gray-800">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                          {message.content}
+                        </ReactMarkdown>
                       </div>
-                    </div>
-                  ) : (
-                    <div className={`max-w-[88%] sm:max-w-[72%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${isUser ? 'bg-indigo-600 text-white rounded-br-md' : 'bg-white text-gray-800 border border-gray-200 rounded-bl-md'}`}>
-                      {isUser ? (
-                        <p className="whitespace-pre-wrap">{message.content}</p>
-                      ) : (
-                        <div className="prose prose-sm max-w-none prose-p:my-0 prose-headings:my-0 prose-ul:my-0 prose-ol:my-0 prose-li:my-0 prose-strong:text-gray-900 prose-p:text-gray-800">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                            {message.content}
-                          </ReactMarkdown>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-            <div ref={bottomRef} />
-          </div>
-
-          <div className="border-t border-gray-100 bg-white/95 backdrop-blur-sm px-3 sm:px-4 py-3 sm:py-3.5">
-            <form onSubmit={handleSubmit}>
-              <div className="flex items-end gap-3">
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onInput={resizeTextarea}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault()
-                      handleSubmit(e)
-                    }
-                  }}
-                  placeholder="Escribe aquí tu mensaje..."
-                  rows={1}
-                  className="flex-1 min-h-[48px] max-h-[124px] resize-none rounded-2xl border border-gray-300 px-4 py-3 text-sm leading-5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                />
-                <button
-                  type="submit"
-                  disabled={loading || !input.trim()}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-3 text-white font-semibold shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <SendHorizonal className="w-4 h-4" />
-                  Enviar
-                </button>
+                    )}
+                  </div>
+                )}
               </div>
-            </form>
-          </div>
+            )
+          })}
+          <div ref={bottomRef} />
+        </div>
+
+        <div className="shrink-0 rounded-3xl border border-white/70 bg-white/95 px-3 sm:px-4 py-3 sm:py-3.5 shadow-[0_10px_35px_rgba(0,0,0,0.05)] backdrop-blur-sm">
+          <form onSubmit={handleSubmit}>
+            <div className="flex items-end gap-3">
+              <textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onInput={resizeTextarea}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSubmit(e)
+                  }
+                }}
+                placeholder="Escribe aquí tu mensaje..."
+                rows={1}
+                className="flex-1 min-h-[48px] max-h-[124px] resize-none rounded-2xl border border-gray-300 px-4 py-3 text-sm leading-5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              />
+              <button
+                type="submit"
+                disabled={loading || !input.trim()}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-3 text-white font-semibold shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <SendHorizonal className="w-4 h-4" />
+                Enviar
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
