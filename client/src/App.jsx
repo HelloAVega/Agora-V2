@@ -98,17 +98,17 @@ function App() {
 
   // Authenticated app layout
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Main Content — padding inferior para la barra fija */}
       <div
-        className="flex-1"
+        className="flex-1 overflow-hidden"
         style={{
           paddingBottom: activeTab === 'chat'
             ? '0px'
-            : 'calc(4.25rem + env(safe-area-inset-bottom, 0px))',
+            : 'calc(4.5rem + env(safe-area-inset-bottom, 0px))',
         }}
       >
-        <main className={activeTab === 'chat' ? 'h-full' : 'p-4 sm:p-6'}>
+        <main className={activeTab === 'chat' ? 'h-full overflow-hidden' : 'p-4 sm:p-6'}>
           {activeTab === 'home' && (
             <Dashboard
               onOpenSession={openSession}
