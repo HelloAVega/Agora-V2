@@ -83,13 +83,13 @@ function App() {
   // If not authenticated, render auth screens in their own full-screen layout
   if (!token) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-transparent flex items-center justify-center text-white">
         <div className="w-full max-w-md p-6">
-          <div className="bg-white rounded-xl p-6 sm:p-8 shadow-md border border-gray-200">
+          <div className="rounded-xl p-6 sm:p-8 shadow-xl border border-purple-900/60 bg-[#221433]/90 backdrop-blur-xl">
             {authView === 'login' && <Login onSwitch={setAuthView} />}
             {authView === 'register' && <Register onSwitch={setAuthView} />}
           </div>
-          <div className="mt-4 text-center text-sm text-gray-500">© Ágora</div>
+          <div className="mt-4 text-center text-sm text-[#c9b9e6]">© Ágora</div>
         </div>
         <Toaster position="top-right" />
       </div>
@@ -98,7 +98,7 @@ function App() {
 
   // Authenticated app layout
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-transparent flex flex-col overflow-hidden text-[#f8f7ff]">
       {/* Main Content — padding inferior para la barra fija */}
       <div
         className="flex-1 overflow-hidden"
@@ -124,8 +124,8 @@ function App() {
             />
           )}
           {activeTab === 'analytics' && (
-            <div className="bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-gray-200">
-              <p className="text-gray-600">Analytics dashboard - Coming soon</p>
+            <div className="rounded-xl p-6 sm:p-8 shadow-xl border border-purple-900/60 bg-[#221433]/90">
+              <p className="text-[#c9b9e6]">Analytics dashboard - Coming soon</p>
             </div>
           )}
           {activeTab === 'settings' && <Settings />}

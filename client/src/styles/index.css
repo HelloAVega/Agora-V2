@@ -8,7 +8,18 @@
   box-sizing: border-box;
 }
 
+html {
+  background: #120b1d;
+}
+
 body {
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  background: transparent;
+  color: #f8f7ff;
+}
+
+::selection {
+  background: rgba(189, 147, 249, 0.35);
+  color: #ffffff;
 }

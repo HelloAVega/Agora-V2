@@ -41,7 +41,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
     strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
     em: ({ children }) => <em className="italic">{children}</em>,
     blockquote: ({ children }) => (
-      <blockquote className="mb-2 border-l-4 border-indigo-200 pl-3 italic text-gray-600 last:mb-0">{children}</blockquote>
+      <blockquote className="mb-2 border-l-4 border-[#bd93f9] pl-3 italic text-[#c9b9e6] last:mb-0">{children}</blockquote>
     ),
   }
 
@@ -185,10 +185,10 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
   }
 
   return (
-    <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] min-h-0 flex flex-col bg-white overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-purple-200 bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-700 text-white shadow-sm">
+    <div className="h-[calc(100dvh-3.5rem-env(safe-area-inset-bottom,0px))] min-h-0 flex flex-col bg-[#140d20] overflow-hidden border border-[#4c2c73] rounded-2xl shadow-2xl shadow-black/30">
+      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-[#4c2c73] bg-gradient-to-r from-[#2b1741] via-[#221433] to-[#1a1026] text-white shadow-sm">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 rounded-full bg-white/15 text-white flex items-center justify-center shadow-sm flex-shrink-0">
+          <div className="w-11 h-11 rounded-full bg-white/10 text-white flex items-center justify-center shadow-sm flex-shrink-0 border border-white/10">
             <Sparkles className="w-5 h-5" />
           </div>
           <div className="min-w-0">
@@ -201,9 +201,9 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
           <button
             type="button"
             onClick={handleCreateNewChat}
-            className="rounded-full bg-white/15 px-3 py-2 text-sm font-semibold text-white hover:bg-white/25 transition flex items-center gap-2"
+            className="rounded-full bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20 transition flex items-center gap-2 border border-white/10"
           >
-            <span className="w-6 h-6 rounded-full bg-white/30 flex items-center justify-center text-white">
+            <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-white">
               <Sparkles className="w-4 h-4 text-white" />
             </span>
             Crear nuevo chat
@@ -211,10 +211,10 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
         </div>
       </div>
 
-      <div className="border-b border-gray-100 bg-white px-4 sm:px-6 py-3">
+      <div className="border-b border-[#4c2c73] bg-[#160f22] px-4 sm:px-6 py-3">
         <div className="flex items-center justify-between gap-3 mb-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-gray-500">Sesiones recientes</h3>
-          <span className="text-xs text-gray-400">{sessions.length} chat{sessions.length === 1 ? '' : 's'}</span>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-[#c9b9e6]">Sesiones recientes</h3>
+          <span className="text-xs text-[#a58fcf]">{sessions.length} chat{sessions.length === 1 ? '' : 's'}</span>
         </div>
         <div className="flex gap-2 overflow-x-auto pb-1">
           {sessions.slice(0, 6).map((session) => (
@@ -222,7 +222,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
               key={session.id}
               type="button"
               onClick={() => handleSelectSession(session.id)}
-              className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium border transition ${sessionId === session.id ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300 hover:text-indigo-700'}`}
+              className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium border transition ${sessionId === session.id ? 'bg-[#7c3aed] text-white border-[#bd93f9]' : 'bg-[#221433] text-[#e8ddff] border-[#4c2c73] hover:border-[#bd93f9] hover:text-white'}`}
             >
               {session.title === 'Nuevo chat' ? 'Chat nuevo' : session.title}
             </button>
@@ -231,17 +231,17 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
       </div>
 
       <div className="flex-1 min-h-0 px-3 sm:px-4 pt-3 sm:pt-4 pb-3 sm:pb-4 flex flex-col gap-3">
-        <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 space-y-4 bg-white border border-gray-100">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 space-y-4 bg-[#160f22] border border-[#4c2c73]">
           {loadingThread && (
-            <div className="text-sm text-gray-500 flex items-center gap-2">
+            <div className="text-sm text-[#c9b9e6] flex items-center gap-2">
               <MessagesSquare className="w-4 h-4" />
               Cargando conversación...
             </div>
           )}
 
           {!loadingThread && messages.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-indigo-200 bg-white p-5 text-gray-700 shadow-sm">
-              <p className="font-semibold text-indigo-700 mb-1">Hola {user?.name || 'de nuevo'}</p>
+            <div className="rounded-2xl border border-dashed border-[#4c2c73] bg-[#221433] p-5 text-[#e8ddff] shadow-sm">
+              <p className="font-semibold text-[#bd93f9] mb-1">Hola {user?.name || 'de nuevo'}</p>
               <p>Escribe tu primer mensaje y la conversación quedará guardada aquí para la próxima vez.</p>
             </div>
           )}
@@ -252,20 +252,20 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
             return (
               <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                 {isTyping ? (
-                    <div className="rounded-md rounded-bl-md border border-gray-200 bg-white px-4 py-3">
+                    <div className="rounded-md rounded-bl-md border border-[#4c2c73] bg-[#221433] px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.2s]" />
-                      <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500 [animation-delay:-0.1s]" />
-                      <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500" />
-                      <span className="ml-2 text-xs font-medium text-gray-500">Ágora está escribiendo...</span>
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-[#bd93f9] [animation-delay:-0.2s]" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-[#bd93f9] [animation-delay:-0.1s]" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-[#bd93f9]" />
+                      <span className="ml-2 text-xs font-medium text-[#a58fcf]">Ágora está escribiendo...</span>
                     </div>
                   </div>
                 ) : (
-                    <div className={`max-w-[88%] sm:max-w-[72%] rounded-md px-4 py-3 text-sm leading-relaxed ${isUser ? 'bg-indigo-600 text-white rounded-br-md' : 'bg-white text-gray-800 border border-gray-200 rounded-bl-md'}`}>
+                    <div className={`max-w-[88%] sm:max-w-[72%] rounded-md px-4 py-3 text-sm leading-relaxed ${isUser ? 'bg-[#7c3aed] text-white rounded-br-md shadow-lg shadow-[#7c3aed]/10' : 'bg-[#221433] text-[#f4ecff] border border-[#4c2c73] rounded-bl-md'}`}>
                     {isUser ? (
                       <p className="whitespace-pre-wrap">{message.content}</p>
                     ) : (
-                      <div className="prose prose-sm max-w-none prose-p:my-0 prose-headings:my-0 prose-ul:my-0 prose-ol:my-0 prose-li:my-0 prose-strong:text-gray-900 prose-p:text-gray-800">
+                      <div className="prose prose-sm max-w-none prose-p:my-0 prose-headings:my-0 prose-ul:my-0 prose-ol:my-0 prose-li:my-0 prose-strong:text-white prose-p:text-[#f4ecff] prose-headings:text-white prose-a:text-[#bd93f9] prose-blockquote:text-[#c9b9e6]">
                         <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                           {message.content}
                         </ReactMarkdown>
@@ -279,7 +279,7 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
           <div ref={bottomRef} />
         </div>
 
-        <div className="shrink-0 border-t border-gray-100 bg-white px-3 sm:px-4 py-3 sm:py-3.5">
+        <div className="shrink-0 border-t border-[#4c2c73] bg-[#160f22] px-3 sm:px-4 py-3 sm:py-3.5">
           <form onSubmit={handleSubmit}>
             <div className="flex items-end gap-3">
               <textarea
@@ -295,12 +295,12 @@ export default function Chat({ sessionId, onSessionChange, onCreateSession, onOp
                 }}
                 placeholder="Escribe aquí tu mensaje..."
                 rows={1}
-                className="flex-1 min-h-[48px] max-h-[124px] resize-none rounded-2xl border border-gray-300 px-4 py-3 text-sm leading-5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="flex-1 min-h-[48px] max-h-[124px] resize-none rounded-2xl border border-[#4c2c73] px-4 py-3 text-sm leading-5 bg-[#221433] text-white placeholder:text-[#80699f] outline-none focus:border-[#bd93f9] focus:ring-2 focus:ring-[#bd93f9]/20"
               />
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-4 py-3 text-white font-semibold shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#7c3aed] px-4 py-3 text-white font-semibold shadow-sm shadow-[#7c3aed]/20 transition hover:bg-[#8b5cf6] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <SendHorizonal className="w-4 h-4" />
                 Enviar

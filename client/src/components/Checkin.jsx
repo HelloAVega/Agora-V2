@@ -24,18 +24,18 @@ export default function Checkin({ onSaved }) {
   }
 
   return (
-    <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+    <div className="bg-[#221433]/90 rounded-lg p-4 shadow-xl border border-[#4c2c73]">
       <h4 className="font-semibold mb-2">Registro rápido</h4>
-      <p className="text-sm text-gray-600 mb-3">¿Cómo te sientes ahora? Selecciona y escribe una nota corta.</p>
+      <p className="text-sm text-[#c9b9e6] mb-3">¿Cómo te sientes ahora? Selecciona y escribe una nota corta.</p>
       <div className="flex items-center gap-3 mb-3">
-        <button onClick={() => setMood('good')} className={`px-3 py-2 rounded ${mood==='good'?'bg-emerald-100':'bg-gray-100'}`}>🙂 Bien</button>
-        <button onClick={() => setMood('neutral')} className={`px-3 py-2 rounded ${mood==='neutral'?'bg-yellow-100':'bg-gray-100'}`}>😐 Regular</button>
-        <button onClick={() => setMood('bad')} className={`px-3 py-2 rounded ${mood==='bad'?'bg-red-100':'bg-gray-100'}`}>☹️ Mal</button>
+        <button onClick={() => setMood('good')} className={`px-3 py-2 rounded border ${mood==='good'?'bg-[#163028] text-[#8df0c7] border-[#2d6b57]':'bg-[#160f22] text-[#c9b9e6] border-[#4c2c73]'}`}>🙂 Bien</button>
+        <button onClick={() => setMood('neutral')} className={`px-3 py-2 rounded border ${mood==='neutral'?'bg-[#2a193e] text-[#d3c1f0] border-[#4c2c73]':'bg-[#160f22] text-[#c9b9e6] border-[#4c2c73]'}`}>😐 Regular</button>
+        <button onClick={() => setMood('bad')} className={`px-3 py-2 rounded border ${mood==='bad'?'bg-[#3b2a12] text-[#f8d18c] border-[#6b4a1f]':'bg-[#160f22] text-[#c9b9e6] border-[#4c2c73]'}`}>☹️ Mal</button>
       </div>
       <form onSubmit={handleSave} className="space-y-2">
-        <textarea value={note} onChange={(e)=>setNote(e.target.value)} placeholder="Añade una nota (opcional)" className="w-full p-2 border rounded h-20" />
+        <textarea value={note} onChange={(e)=>setNote(e.target.value)} placeholder="Añade una nota (opcional)" className="w-full p-2 border border-[#4c2c73] rounded h-20 bg-[#160f22] text-white placeholder:text-[#80699f] outline-none focus:border-[#bd93f9] focus:ring-2 focus:ring-[#bd93f9]/20" />
         <div className="flex justify-end">
-          <button type="submit" disabled={saving} className="px-4 py-2 bg-indigo-600 text-white rounded">Guardar</button>
+          <button type="submit" disabled={saving} className="px-4 py-2 bg-[#7c3aed] text-white rounded shadow-lg shadow-[#7c3aed]/20 hover:bg-[#8b5cf6] transition">Guardar</button>
         </div>
       </form>
     </div>

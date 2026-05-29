@@ -10,7 +10,7 @@ const menuItems = [
 export default function BottomNav({ activeTab, setActiveTab }) {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-[#1f1230]/95 backdrop-blur-xl border-t border-[#4c2c73] shadow-[0_-4px_24px_rgba(0,0,0,0.35)]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
       aria-label="Navegación principal"
     >
@@ -26,12 +26,12 @@ export default function BottomNav({ activeTab, setActiveTab }) {
               onClick={() => setActiveTab(item.id)}
               aria-current={isActive ? 'page' : undefined}
               className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 px-1 min-h-[60px] transition-colors ${
-                isActive ? 'text-indigo-600' : 'text-gray-500 hover:text-indigo-500'
+                isActive ? 'text-[#bd93f9]' : 'text-[#a58fcf] hover:text-[#f8f7ff]'
               }`}
             >
               <span
                 className={`flex items-center justify-center w-10 h-7 rounded-full transition-colors ${
-                  isActive ? 'bg-indigo-100' : ''
+                  isActive ? 'bg-[#3a2457] text-[#bd93f9]' : ''
                 }`}
               >
                 <Icon className="w-6 h-6" strokeWidth={isActive ? 2.5 : 2} />

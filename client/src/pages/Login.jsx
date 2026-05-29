@@ -36,27 +36,27 @@ export default function Login({ onSwitch }) {
   return (
     <div className="max-w-md mx-auto">
       <h2 className="text-2xl font-bold mb-4">Iniciar sesión</h2>
-      {error && <div className="text-red-600 mb-3">{error}</div>}
+      {error && <div className="text-[#ff79c6] mb-3">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 border rounded"
+          className="w-full p-3 rounded border border-[#4c2c73] bg-[#160f22] text-white placeholder:text-[#80699f] outline-none focus:border-[#bd93f9] focus:ring-2 focus:ring-[#bd93f9]/20"
         />
         <input
           type="password"
           placeholder="Contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 border rounded"
+          className="w-full p-3 rounded border border-[#4c2c73] bg-[#160f22] text-white placeholder:text-[#80699f] outline-none focus:border-[#bd93f9] focus:ring-2 focus:ring-[#bd93f9]/20"
         />
-        <button className="w-full bg-indigo-600 text-white py-3 rounded">Entrar</button>
+        <button className="w-full bg-[#7c3aed] text-white py-3 rounded shadow-lg shadow-[#7c3aed]/20 hover:bg-[#8b5cf6] transition">Entrar</button>
       </form>
       <p className="mt-4 text-sm">
         ¿No tienes cuenta?{' '}
-        <button onClick={() => onSwitch('register')} className="text-indigo-600 underline">
+        <button onClick={() => onSwitch('register')} className="text-[#bd93f9] underline">
           Regístrate
         </button>
       </p>

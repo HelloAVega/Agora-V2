@@ -53,21 +53,21 @@ export default function Register({ onSwitch }) {
   return (
     <div className="max-w-md mx-auto">
       <h2 className="text-2xl font-bold mb-4">Registro</h2>
-      {error && <div className="text-red-600 mb-3">{error}</div>}
+      {error && <div className="text-[#ff79c6] mb-3">{error}</div>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
           placeholder="Nombre (opcional)"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full p-3 border rounded"
+          className="w-full p-3 rounded border border-[#4c2c73] bg-[#160f22] text-white placeholder:text-[#80699f] outline-none focus:border-[#bd93f9] focus:ring-2 focus:ring-[#bd93f9]/20"
         />
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 border rounded"
+          className="w-full p-3 rounded border border-[#4c2c73] bg-[#160f22] text-white placeholder:text-[#80699f] outline-none focus:border-[#bd93f9] focus:ring-2 focus:ring-[#bd93f9]/20"
         />
         <div>
           <input
@@ -75,23 +75,23 @@ export default function Register({ onSwitch }) {
             placeholder="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 border rounded"
+            className="w-full p-3 rounded border border-[#4c2c73] bg-[#160f22] text-white placeholder:text-[#80699f] outline-none focus:border-[#bd93f9] focus:ring-2 focus:ring-[#bd93f9]/20"
           />
-          <div className="mt-2 text-sm text-gray-600">
+          <div className="mt-2 text-sm text-[#c9b9e6]">
             {getPasswordScore(password).label}
-            <div className="w-full bg-gray-200 h-2 rounded mt-1">
+            <div className="w-full bg-[#2a193e] h-2 rounded mt-1 overflow-hidden">
               <div
                 style={{ width: `${(getPasswordScore(password).score / 4) * 100}%` }}
-                className="h-2 rounded bg-gradient-to-r from-emerald-400 to-indigo-600"
+                className="h-2 rounded bg-gradient-to-r from-[#ff79c6] via-[#bd93f9] to-[#8b5cf6]"
               />
             </div>
           </div>
         </div>
-        <button className="w-full bg-emerald-600 text-white py-3 rounded">Crear cuenta</button>
+        <button className="w-full bg-[#7c3aed] text-white py-3 rounded shadow-lg shadow-[#7c3aed]/20 hover:bg-[#8b5cf6] transition">Crear cuenta</button>
       </form>
       <p className="mt-4 text-sm">
         ¿Ya tienes cuenta?{' '}
-        <button onClick={() => onSwitch('login')} className="text-indigo-600 underline">
+        <button onClick={() => onSwitch('login')} className="text-[#bd93f9] underline">
           Inicia sesión
         </button>
       </p>
