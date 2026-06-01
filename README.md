@@ -44,7 +44,7 @@ Agora-V2/
 ```bash
 NODE_ENV=development
 PORT=3001
-DATABASE_URL=******localhost:5432/agora   # opcional si usas SQLite
+DATABASE_URL=postgresql://<usuario>:<password>@localhost:5432/agora   # opcional si usas SQLite
 SQLITE_STORAGE=./server/data/agora.sqlite                       # fallback local
 JWT_SECRET=your_jwt_secret_key_here
 FRONTEND_URL=http://localhost:5173
