@@ -1,212 +1,131 @@
-# Ágora V2 - Sistema de Apoyo Emocional Híbrido
+# Ágora V2 - Aplicación web de apoyo emocional
 
-Aplicación web completa mobile-first para apoyo emocional con IA conversacional y supervisión profesional.
+Aplicación web full-stack para acompañamiento emocional con chat asistido por IA, seguimiento del estado de ánimo e historial personal.
 
-## 🚀 Quick Start
+## Funcionalidades principales
 
-### Desarrollo con Docker
+- Registro e inicio de sesión con JWT.
+- Chat con sesiones persistentes.
+- Respuestas del asistente con soporte Markdown.
+- Check-in emocional rápido (bien / regular / mal) con nota opcional.
+- Panel de resumen con recomendación generada por IA.
+- Línea de tiempo emocional por semanas.
+- Ajustes de perfil: nombre, email, avatar y cambio de contraseña.
+
+## Stack actual
+
+- **Frontend:** React 18 + Vite + Tailwind CSS + Zustand
+- **Backend:** Node.js + Express + Sequelize
+- **Base de datos:** PostgreSQL (por `DATABASE_URL`) o SQLite local (fallback)
+- **Auth:** JWT + bcryptjs
+- **Tiempo real:** Socket.IO
+- **IA:** Gemini API
+
+## Requisitos
+
+- Node.js **22.x**
+- npm **11.x**
+
+## Estructura del proyecto
+
+```txt
+Agora-V2/
+├── client/                # Frontend React + Vite
+├── server/                # API Express + Sequelize
+├── docker-compose.yml     # Entorno de desarrollo con contenedores
+├── package.json           # Scripts raíz
+└── README.md
+```
+
+## Variables de entorno
+
+### `server/.env` (o variables del entorno en producción)
+
+```bash
+NODE_ENV=development
+PORT=3001
+DATABASE_URL=******localhost:5432/agora   # opcional si usas SQLite
+SQLITE_STORAGE=./server/data/agora.sqlite                       # fallback local
+JWT_SECRET=your_jwt_secret_key_here
+FRONTEND_URL=http://localhost:5173
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-flash-latest
+```
+
+### `client/.env.local` (opcional)
+
+```bash
+VITE_API_URL=http://localhost:3001
+```
+
+> Si no defines `VITE_API_URL`, el frontend usa rutas relativas (`/api/...`), útil cuando backend y frontend comparten dominio en producción.
+
+## Instalación y ejecución
+
+### Opción 1: desarrollo local
+
+```bash
+npm install
+npm run install:all
+npm run dev
+```
+
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:3001
+- Healthcheck: http://localhost:3001/api/health
+
+### Opción 2: con Docker
 
 ```bash
 docker-compose up
 ```
 
-Accede a:
-- **Frontend**: http://localhost:5173
-- **Backend**: http://localhost:5000
-- **Base de datos**: PostgreSQL del contenedor `postgres`
+## Scripts disponibles
 
-### Desarrollo local sin Docker
-
-Instala dependencias desde la raíz y los subproyectos:
+### Raíz
 
 ```bash
-npm install
-cd server && npm install && cd ..
-cd client && npm install && cd ..
-```
-
-Configura los entornos:
-
-**server/.env**
-```bash
-NODE_ENV=development
-PORT=3001
-DATABASE_URL=postgresql://user:pass@localhost:5432/agora
-JWT_SECRET=tu_secreto_jwt_super_seguro_aqui
-FRONTEND_URL=http://localhost:5173
-GEMINI_API_KEY=sk-...
-```
-
-**client/.env.local**
-```bash
-# Opcional para desarrollo local o Docker.
-VITE_API_URL=http://localhost:3001
-```
-
-Luego inicia:
-
-```bash
-npm run dev
-```
-
-Accede a:
-- **Frontend**: http://localhost:5173
-- **Backend**: http://localhost:3001
-
-### Desarrollo por terminales separadas
-
-```bash
-# Terminal 1
-cd server
-npm run dev
-
-# Terminal 2
-cd client
-npm run dev
-```
-
-## 📋 Requisitos
-
-- Node.js >= 16.0.0
-- npm >= 8.0.0
-- PostgreSQL (para producción)
-
-## 🏗️ Arquitectura
-
-**Full Stack:**
-- **Backend:** Express.js + Node.js + Socket.io + JWT
-- **Frontend:** React 18 + Vite + Tailwind CSS
-- **Base de Datos:** PostgreSQL + Sequelize
-- **Estado:** Zustand
-- **Comunicación:** REST API + WebSockets
-
-## 📁 Estructura del Proyecto
-
-```
-Agora-V2/
-├── server/
-│   ├── config/          # Configuración DB
-│   ├── controllers/      # Lógica de negocio
-│   ├── middleware/       # Autenticación, validación
-│   ├── models/           # Modelos Sequelize
-│   ├── routes/           # Rutas API
-│   ├── services/         # Servicios (IA, detección riesgo)
-│   ├── utils/            # Utilidades
-│   ├── server.js         # Punto de entrada
-│   └── package.json
-├── client/
-│   ├── src/
-│   │   ├── components/   # Componentes React
-│   │   ├── pages/        # Páginas/vistas
-│   │   ├── hooks/        # Custom hooks
-│   │   ├── stores/       # Estado global
-│   │   ├── services/     # Llamadas API
-│   │   ├── types/        # TypeScript types
-│   │   ├── styles/       # CSS/Tailwind
-│   │   └── utils/        # Funciones auxiliares
-│   ├── index.html
-│   ├── vite.config.js
-│   └── package.json
-├── package.json          # Scripts root
-├── Procfile              # Heroku deployment
-└── .env.example          # Variables de ambiente
-```
-
-## 🛠️ Stack Tecnológico
-
-| Capa | Tecnología | Versión |
-|------|-----------|---------|
-| **Frontend** | React + Vite | 18.2 + 5.0 |
-| **Backend** | Express.js | 4.18 |
-| **BD** | PostgreSQL | Latest |
-| **ORM** | Sequelize | 6.35 |
-| **Auth** | JWT + bcryptjs | 9.1 + 2.4 |
-| **Real-time** | Socket.io | 4.7 |
-| **Estilos** | Tailwind CSS | 3.3 |
-| **Estado** | Zustand | 4.4 |
-| **HTTP** | Axios | 1.6 |
-
-## 🌍 Despliegue (Heroku)
-
-Está configurado para deploy automático desde GitHub:
-
-1. Push código a GitHub
-2. Conecta en Heroku Dashboard: New → Create app → Connect GitHub
-3. Selecciona repo y rama `main`
-4. Enable "Automatic deploys"
-5. ¡Listo! Cada push auto-deploya
-
-**Variables en Heroku:**
-```
-DATABASE_URL=postgresql://...  (Auto-asignada si usas Heroku Postgres)
-JWT_SECRET=tu_secreto
-GEMINI_API_KEY=tu_key
-GEMINI_MODEL=gemini-flash-latest
-```
-
-Si Heroku te sigue devolviendo `GEMINI_API_KEY no está configurada`, revisa en Settings → Config Vars que la variable exista exactamente con ese nombre.
-
-En Heroku no definas `VITE_API_URL`; el frontend usará el mismo origen HTTPS.
-
-## 📝 Variables de Ambiente
-
-**server/.env:**
-```
-NODE_ENV=development
-PORT=3001
-DATABASE_URL=postgresql://user:pass@localhost:5432/agora
-JWT_SECRET=tu_secreto_jwt_super_seguro_aqui
-FRONTEND_URL=http://localhost:5173
-GEMINI_API_KEY=sk-...
-GEMINI_MODEL=gemini-flash-latest
-```
-
-Ese archivo es la fuente local/Docker para Gemini. En Heroku la misma configuración va en `Settings → Config Vars` porque allí no se usa archivo `.env`.
-
-**client/.env.local:**
-```
-VITE_API_URL=http://localhost:3001
-```
-
-## ⚙️ Scripts Disponibles
-
-### Root
-```bash
-npm run dev              # Dev mode (frontend + backend paralelos)
-npm run build            # Build para producción
-npm start                # Producción
-npm run server:dev       # Solo backend
-npm run client:dev       # Solo frontend
+npm run dev           # frontend + backend en paralelo
+npm run build         # build del frontend
+npm start             # levanta server/server.js
+npm run install:all   # instala dependencias de server y client
+npm run server:dev    # backend en modo desarrollo
+npm run client:dev    # frontend en modo desarrollo
+npm run client:build  # build del frontend
 ```
 
 ### Server
+
 ```bash
 cd server
-npm run dev              # Nodemon auto-reload
-npm start                # Producción
+npm run dev
+npm start
 ```
 
 ### Client
+
 ```bash
 cd client
-npm run dev              # Vite dev server
-npm run build            # Build optimizado
-npm run preview          # Previsualizar build
+npm run dev
+npm run build
+npm run preview
 ```
 
-## 🔒 Seguridad
+## API base
 
-- ✅ Contraseñas hasheadas con bcryptjs
-- ✅ JWT para autenticación
-- ✅ CORS habilitado y restringido
-- ✅ Variables sensibles en .env
-- ✅ Cifrado de conversaciones (E2E optional)
-- ✅ Anonimato de usuario (UUID)
-
-## 📱 Responsive Design
-
-- Mobile-first en Tailwind CSS
-- Breakpoints: xs(320px), sm(640px), md(768px), lg(1024px)
-- 100% funcional en móvil, tablet, desktop
-- WCAG 2.1 AA para accesibilidad
-
+- `GET /api/health`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me`
+- `PUT /api/auth/me`
+- `POST /api/auth/change-password`
+- `POST /api/auth/me/avatar`
+- `GET /api/chat/sessions`
+- `POST /api/chat/sessions`
+- `GET /api/chat/thread`
+- `POST /api/chat/message`
+- `POST /api/mood/checkin`
+- `GET /api/mood/entries`
+- `GET /api/mood/insights`
+- `GET /api/mood/timeline`
+- `POST /api/mood/generate`
